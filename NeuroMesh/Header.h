@@ -63,7 +63,7 @@ public:
 
 	void insertNeuron(int id, double weight) {
 
-		
+
 
 	}
 
@@ -90,7 +90,7 @@ public:
 		double weight;
 
 		while (fin >> id >> weight) {
-			
+
 			if (tail_layer->current_count == N * N) {
 				Layer* newLayer = createLayer(N, tail_layer->layerId + 1, nullptr, tail_layer);
 				tail_layer->next = newLayer;
@@ -141,7 +141,7 @@ public:
 
 		buildAllSynapses();
 	}
-	
+
 
 
 	//==============deleting=================
@@ -156,10 +156,13 @@ public:
 	Layer* mergeLayers(Layer* a, Layer* b);
 	void removeEmptyLayer(Layer* l);
 
-	
+
 
 	//===============Printng/Exportng============
-	void printLayer(int layerid);
+	void printLayer(int layerid) {
+
+
+	}
 	void exportMesh(const std::string& fileName);
 
 	void navigateMesh();
