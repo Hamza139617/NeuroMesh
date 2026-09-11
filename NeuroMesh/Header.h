@@ -42,14 +42,24 @@ private:
 	Layer* head_layer;
 	Layer* tail_layer;
 	int N;
+	double pthreshold;
+	double fthreshold;
 
 public:
-	NeuroMesh();
+	NeuroMesh() {
+		head_layer = nullptr;
+		tail_layer = nullptr;
+		N = 0;
+		pthreshold = 0.0;
+		fthreshold = 0.0;
+	}
 
 	//==============creation================
 
 	void loadFromFile(const std::string& fileName);
-	void insertNeuron(int id, double weight);
+	void insertNeuron(int id, double weight) {
+
+	}
 
 
 	//==============deleting=================
@@ -83,4 +93,10 @@ public:
 	char forwardPropagate(char inputLetter);
 
 	void backwardPropagate(char targetLetter);
+
+private:
+	// private helper functions for accomplshing a specific task
+	Layer* createLayer() {
+
+	}
 };
