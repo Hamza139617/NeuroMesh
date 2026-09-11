@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="NeuroMesh/NeuroMesh.vcxproj" />
+  <Project Path="NeuroMesh/NeuroMesh.vcxproj" Id="38245dec-07f1-458c-92ff-96d60c2435fd" />
 </Solution>
