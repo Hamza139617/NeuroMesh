@@ -160,7 +160,32 @@ public:
 
 	//===============Printng/Exportng============
 	void printLayer(int layerid) {
+		// for printing the layer 
+		// this is als going to be helping us in the debugging part as well
 
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+
+			Neuron* n;
+
+			n = l->top_left;
+
+			cout << "Layer : " << l->layerId << endl;
+
+			while (n != nullptr) {
+
+				Neuron* st = n;
+
+				for (; n->right != nullptr; n = n->right) {
+					cout << n->weight << " ";
+				}
+
+				cout << n->weight << endl;
+
+				n = st->down;
+			}
+			
+
+		}
 
 	}
 	void exportMesh(const std::string& fileName);
