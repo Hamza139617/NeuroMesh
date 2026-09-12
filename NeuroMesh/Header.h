@@ -63,13 +63,14 @@ public:
 	//==============creation================
 
 	void insertNeuron(int id, double weight) {
-
+		// for inserting the neuron according to the structuring constraints and ordering constraints
 
 
 	}
 
 
 	void loadFromFile(const std::string& fileName) {
+		// loading the data from the file for initializing the mesh
 		ifstream fin(fileName);
 
 		if (!fin) {
