@@ -6,9 +6,9 @@ int main() {
 	NeuroMesh m;
 
 	m.loadFromFile("mesh.txt");
-	m.printLayer(0);
 
 
+	m.printNeuron(1);
 
 	return 0;
 }

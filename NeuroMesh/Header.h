@@ -192,11 +192,116 @@ public:
 
 	void navigateMesh();
 
-	void printNeuron(int id);
+	Neuron* findNeuronById(int id) {
+		// for finding the neuron by id and rturning
+
+		int row = 0;
+		int col = 0;
+
+		Neuron* n = nullptr; // for traversing
+		Neuron* st = nullptr; // for storing the current ptr
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+
+			n = l->top_left;
+
+			row = 0;
+			col = 0;
+
+			while (n != nullptr) {
+
+				st = n;
+
+
+				for (; n->right != nullptr; n = n->right) {
+
+					if (n->id == id) {
+						cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
+						return n;
+					}
+
+					col++;
+				}
+
+				if (n->id == id) {
+					cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
+					return n;
+				}
+
+				row++;
+				col = 0;
+
+				n = st->down;
+
+			}
+
+		}
+
+		return nullptr;
+	}
+
+	void printNeuron(int id) {
+		// sharing the neuron information 
+		Neuron* n = findNeuronById(id);
+
+		if (n) {
+			cout << " Neuron id : " << n->id << endl << "Weight : " << n->weight;
+		}
+
+		return;
+	}
 
 	//!!!!!!!!!!!!!!!!!searching!!!!!!!!!!!!!!!!!!!
-	Neuron* findNeuronById(int id);
-	Neuron* findNeuronByPosition(int layerId, int row, int col);
+
+	Neuron* findNeuronByPosition(int layerId, int row, int col) {
+		// findng the neuron by layerid row and col then returning it
+
+		int row = 0;
+		int col = 0;
+
+		Neuron* n = nullptr; // for traversing
+		Neuron* st = nullptr; // for storing the current ptr
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+
+			n = l->top_left;
+
+			row = 0;
+			col = 0;
+
+			while (n != nullptr) {
+
+				st = n;
+
+
+				for (; n->right != nullptr; n = n->right) {
+
+					if (n->id == id) {
+						cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
+						return n;
+					}
+
+					col++;
+				}
+
+				if (n->id == id) {
+					cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
+					return n;
+				}
+
+				row++;
+				col = 0;
+
+				n = st->down;
+
+			}
+
+		}
+
+		return nullptr;
+
+
+	}
 
 
 	//!!!!!!!!!!!!!!!!!prapogation!!!!!!!!!!!!!!!!!
