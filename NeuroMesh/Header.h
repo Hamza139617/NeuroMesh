@@ -515,6 +515,8 @@ private:
 		}
 	}
 
+	//! column ordering and management functions 
+
 	int columnHeight(Layer* l, int col) {
 		int h = 0;
 		for (Neuron* n = columnTop(l, col); n != nullptr; n = n->down) h++;
@@ -529,10 +531,63 @@ private:
 		return c;
 	}
 
+	
+	void orderColumns() {
+		// basically for ordering the columns
 
+		double weight1;
+		double weight2;
+
+		int col = 0;
+		int row = 0;
+
+		Neuron* secondN = nullptr;
+		Neuron* temp = nullptr;
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+
+			col = 0;
+
+			for (Neuron* n = l->top_left; n->right != nullptr; n = n->right, col++) {
+
+				weight1 = columnWeight(l, col);
+				weight2 = columnWeight(l, col + 1);
+
+				if (weight1 > weight2) {
+					// checking if the total weight of one column is more then the total weight of the other column
+					// in this case swap
+
+					for (Neuron* firstN = n; firstN; firstN = firstN->down, row++) {
+						secondN = firstN->right;
+
+						firstN->right = secondN->right;
+						secondN->right = firstN;
+						
+						if (firstN->right) {
+							firstN->right->left = firstN;
+						}
+
+						secondN->left = firstN->left;
+						firstN->left = secondN;
+
+
+					}
+					row = 0;
+				}
+
+			}
+
+			
+
+		}
+
+	}
 
 
 	public:
+
+
+		
 		double columnWeight(Layer* l, int col) {
 			double sum = 0.0;
 			for (Neuron* n = columnTop(l, col); n != nullptr; n = n->down) {
@@ -541,5 +596,6 @@ private:
 
 			return sum;
 		}
+
 
 };
