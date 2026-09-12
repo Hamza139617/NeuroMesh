@@ -467,6 +467,7 @@ private:
 		Synapse* s = new Synapse();
 
 		s->weight = (from->weight + to->weight) / 4.0;
+		s->weight = (from->weight + to->weight) / 4.0;
 		s->is_active = false;
 		s->direction = dir;
 		s->target_neuron = to;
@@ -531,6 +532,20 @@ private:
 		return c;
 	}
 
+
+	void clearAxons(Neuron* n) {
+		if (!n) return;
+		Synapse* s = n->head_axon;
+		Synapse* next;
+
+		while (s != nullptr) {
+			next = s->next_synapse;
+			delete s;
+			s = next;
+		}
+		n->head_axon = nullptr;
+	}
+
 	
 	void orderColumns() {
 		// basically for ordering the columns
@@ -569,6 +584,8 @@ private:
 
 						secondN->left = firstN->left;
 						firstN->left = secondN;
+
+
 
 
 					}
