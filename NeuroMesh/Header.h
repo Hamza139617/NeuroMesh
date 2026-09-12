@@ -10,7 +10,7 @@ using namespace std;
 
 struct Synapse; // forwarding declare
 
-struct Neuron {
+struct Neuron { // basic building block
 	int id;
 	double weight;
 	Neuron* up;
@@ -20,15 +20,16 @@ struct Neuron {
 	Synapse* head_axon;
 };
 
-struct Synapse {
+struct Synapse { // the connection for the conecting neurons
 	double weight;
 	bool is_active;
+	char direction;// U up D down L left R right
 	Neuron* target_neuron;
 	Synapse* next_synapse;
 };
 
 
-struct Layer {
+struct Layer { // collec tion of neurons
 	int N;
 	int current_count;
 
@@ -42,7 +43,7 @@ struct Layer {
 
 
 
-class NeuroMesh {
+class NeuroMesh { // the neural substrate
 private:
 	Layer* head_layer;
 	Layer* tail_layer;
@@ -265,7 +266,7 @@ public:
 		for (Layer* l = head_layer; l != nullptr; l = l->next) {
 
 			if (l->layerId == layerId) {
-
+				// cout << "h1";
 
 				n = l->top_left;
 
@@ -282,6 +283,7 @@ public:
 						for (; n->right != nullptr; n = n->right) {
 
 							if (col1 == col) {
+								//cout << "h2";
 								cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
 								cout << "Weight : " << n->weight << " Neuron id : " << n->id;		
 								return n;
@@ -334,17 +336,39 @@ private:
 		return newLayer;
 	}
 
-	void addSynapse(Neuron* from, Neuron* to) {
+	void addSynapse(Neuron* from, Neuron* to, char dir) {
+		// for adding the synapse between different neurons alongside the direction represented dir
+
 		if (from == nullptr || to == nullptr) return;
 		Synapse* s = new Synapse();
 		
-		s->weight = 0.0;
+		s->weight = (from->weight + to->weight) / 4.0;
 		s->is_active = false;
+		s->direction = dir;
 		s->target_neuron = to;
 		s->next_synapse = from->head_axon;
 		from->head_axon = s;
 
 	}
+
+	void setSynapseWeight(int id, char dir, double newWeight) {
+		Neuron* source = findNeuronById(id);
+
+		if (source == nullptr) {
+			cout << "No neuron with id " << id << endl;
+			return;
+		}
+
+		for (Synapse* s = source->head_axon; s != nullptr; s = s->next_synapse) {
+			
+			if (s->direction == dir) {
+				s->weight = newWeight;
+				return;
+			}
+		}
+
+		cout << "Neuron " << id << " has no synapse in direction " << dir << endl;
+	} 
 
 	void buildAllSynapses() {
 		for (Layer* l = head_layer; l != nullptr && l->next != nullptr; l = l->next) {
@@ -359,10 +383,10 @@ private:
 
 				while (src != nullptr) {
 					if (aligned != nullptr) {
-						addSynapse(src, aligned->up);
-						addSynapse(src, aligned->down);
-						addSynapse(src, aligned->left);
-						addSynapse(src, aligned->right);
+						addSynapse(src, aligned->up, 'U');
+						addSynapse(src, aligned->down, 'D');
+						addSynapse(src, aligned->left, 'L');
+						addSynapse(src, aligned->right, 'R');
 					}
 
 					src = src->right;
