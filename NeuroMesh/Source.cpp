@@ -7,8 +7,9 @@ int main() {
 
 	m.loadFromFile("mesh.txt");
 
+		
 
-	m.printNeuron(1);
+	m.findNeuronByPosition(0, 1, 1);
 
 	return 0;
 }

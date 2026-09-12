@@ -256,43 +256,54 @@ public:
 	Neuron* findNeuronByPosition(int layerId, int row, int col) {
 		// findng the neuron by layerid row and col then returning it
 
-		int row = 0;
-		int col = 0;
+		int row1 = 0;
+		int col1 = 0;
 
 		Neuron* n = nullptr; // for traversing
 		Neuron* st = nullptr; // for storing the current ptr
 
 		for (Layer* l = head_layer; l != nullptr; l = l->next) {
 
-			n = l->top_left;
-
-			row = 0;
-			col = 0;
-
-			while (n != nullptr) {
-
-				st = n;
+			if (l->layerId == layerId) {
 
 
-				for (; n->right != nullptr; n = n->right) {
+				n = l->top_left;
 
-					if (n->id == id) {
-						cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
-						return n;
+				row1 = 0;// assuming the row and col passed is 0 indexed
+				col1 = 0;
+
+				while (n != nullptr) {
+					st = n;
+
+					if (row1 == row) {
+
+
+						
+						for (; n->right != nullptr; n = n->right) {
+
+							if (col1 == col) {
+								cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
+								cout << "Weight : " << n->weight << " Neuron id : " << n->id;		
+								return n;
+							}
+
+							col1++;
+						}
+
+						if (col1 == col) {
+							cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
+							cout << "Weight : " << n->weight << " Neuron id : " << n->id;
+							return n;
+						}
+
 					}
 
-					col++;
+					row1++;
+					col1 = 0;
+
+					n = st->down;
+
 				}
-
-				if (n->id == id) {
-					cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
-					return n;
-				}
-
-				row++;
-				col = 0;
-
-				n = st->down;
 
 			}
 
