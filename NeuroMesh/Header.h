@@ -51,6 +51,12 @@ private:
 	double pthreshold;
 	double fthreshold;
 
+	struct PlacementSpot {
+		Layer* layer;
+		int row;
+		int col;
+	};
+
 public:
 	NeuroMesh() {
 		head_layer = nullptr;
@@ -65,6 +71,18 @@ public:
 	void insertNeuron(int id, double weight) {
 		// for inserting the neuron according to the structuring constraints and ordering constraints
 
+		if (silentNeuronReturnById(id) != nullptr) {
+			cout << endl << "Insert failed: id" << id << " already exists." << endl;
+			// if there is already a neuron with the same id then return because to neuron can't have same id
+			return;
+		}
+
+		PlacementSpot  spot = findPlacementSpot();
+		Neuron* n = placeNeuronAt(spot.layer, spot.row, spot.col, id, weight);
+		wireNeuronConnections(spot.layer, n, spot.row, spot.col);
+
+		cout << "Inserted neuron id " << id << " Layer : " << spot.layer->layerId << endl;
+		cout << " row " << spot.row << " col " << spot.col << endl;
 
 	}
 
@@ -80,67 +98,14 @@ public:
 
 		fin >> N >> pthreshold >> fthreshold;
 
-		head_layer = tail_layer = createLayer(N, 0, nullptr, nullptr);
-
-		int row = 0, col = 0;
-		Neuron* leftNeighbor = nullptr;
-		Neuron* rowStart = nullptr;
-		Neuron* prevRowStart = nullptr;
-		Neuron* aboveWalker = nullptr;
-
 		int id;
 		double weight;
-
 		while (fin >> id >> weight) {
-
-			if (tail_layer->current_count == N * N) {
-				Layer* newLayer = createLayer(N, tail_layer->layerId + 1, nullptr, tail_layer);
-				tail_layer->next = newLayer;
-				tail_layer = newLayer;
-
-				row = 0;
-				col = 0;
-
-				leftNeighbor = nullptr;
-				rowStart = nullptr;
-				prevRowStart = nullptr;
-				aboveWalker = nullptr;
-
-			}
-
-			Neuron* aboveNeighbor = (row == 0) ? nullptr : aboveWalker;
-
-			Neuron* n = new Neuron();
-			n->id = id;
-			n->weight = weight;
-			n->up = aboveNeighbor;
-			n->down = nullptr;
-			n->left = leftNeighbor;
-			n->right = nullptr;
-			n->head_axon = nullptr;
-
-			if (leftNeighbor) leftNeighbor->right = n;
-			if (aboveNeighbor) aboveNeighbor->down = n;
-			if (row == 0 && col == 0) tail_layer->top_left = n;
-
-			tail_layer->current_count++;
-
-			if (col == 0) rowStart = n;
-			leftNeighbor = n;
-			if (row > 0) aboveWalker = aboveWalker->right;
-
-			col++;
-			if (col == N) {
-				col = 0;
-				row++;
-				prevRowStart = rowStart;
-				aboveWalker = prevRowStart;
-				leftNeighbor = nullptr;
-			}
+			PlacementSpot spot = findPlacementSpot();
+			placeNeuronAt(spot.layer, spot.row, spot.col, id, weight);
 		}
 
 		fin.close();
-
 		buildAllSynapses();
 	}
 
@@ -185,7 +150,7 @@ public:
 
 				n = st->down;
 			}
-			
+
 
 		}
 
@@ -205,38 +170,21 @@ public:
 
 		for (Layer* l = head_layer; l != nullptr; l = l->next) {
 
-			n = l->top_left;
-
-			row = 0;
 			col = 0;
-
-			while (n != nullptr) {
-
-				st = n;
-
-
-				for (; n->right != nullptr; n = n->right) {
-
+			for (Neuron* colt = l->top_left; colt; colt = colt->right) {
+				col++;
+				for (Neuron* n = colt; n; n = n->down) {
 					if (n->id == id) {
 						cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
 						return n;
 					}
 
-					col++;
+					row++;
+
 				}
-
-				if (n->id == id) {
-					cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
-					return n;
-				}
-
-				row++;
-				col = 0;
-
-				n = st->down;
-
+				row = 0;
 			}
-
+			
 		}
 
 		return nullptr;
@@ -262,51 +210,27 @@ public:
 		int col1 = 0;
 
 		Neuron* n = nullptr; // for traversing
-		Neuron* st = nullptr; // for storing the current ptr
 
 		for (Layer* l = head_layer; l != nullptr; l = l->next) {
 
 			if (l->layerId == layerId) {
 				// cout << "h1";
 
-				n = l->top_left;
+				Neuron* colt = l->top_left;
+				for (int c = 0; c < col && colt; c++)
+					colt = colt->right;
+			
+				if (!colt) return nullptr;
 
-				row1 = 0;// assuming the row and col passed is 0 indexed
-				col1 = 0;
+				Neuron* n = colt;
+				for (int r = 0; r < row && n; r++)
+					n = n->down;
 
-				while (n != nullptr) {
-					st = n;
+				if (!n) 
+				return nullptr;
 
-					if (row1 == row) {
-
-
-						
-						for (; n->right != nullptr; n = n->right) {
-
-							if (col1 == col) {
-								//cout << "h2";
-								cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
-								cout << "Weight : " << n->weight << " Neuron id : " << n->id;		
-								return n;
-							}
-
-							col1++;
-						}
-
-						if (col1 == col) {
-							cout << "Layer Id : " << l->layerId << endl << "Row: " << row << " Col: " << col;
-							cout << "Weight : " << n->weight << " Neuron id : " << n->id;
-							return n;
-						}
-
-					}
-
-					row1++;
-					col1 = 0;
-
-					n = st->down;
-
-				}
+				cout << "Neuron id : " << n->id << " Weight: " << n->weight;
+				return n;
 
 			}
 
@@ -317,6 +241,75 @@ public:
 
 	}
 
+	Neuron* silentNeuronReturnByPosition(int layerId, int row, int col) {
+		// findng the neuron by layerid row and col then returning it
+
+		int row1 = 0;
+		int col1 = 0;
+
+		Neuron* n = nullptr; // for traversing
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+
+			if (l->layerId == layerId) {
+				// cout << "h1";
+
+				Neuron* colt = l->top_left;
+				for (int c = 0; c < col && colt; c++)
+					colt = colt->right;
+
+				if (!colt) return nullptr;
+
+				Neuron* n = colt;
+				for (int r = 0; r < row && n; r++)
+					n = n->down;
+
+				if (!n)
+					return nullptr;
+
+
+				return n;
+
+			}
+
+		}
+
+		return nullptr;
+
+
+	}
+
+	Neuron* silentNeuronReturnById(int id) {
+		// for finding the neuron by id and rturning
+
+		int row = 0;
+		int col = 0;
+
+		Neuron* n = nullptr; // for traversing
+		Neuron* st = nullptr; // for storing the current ptr
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+
+			col = 0;
+			for (Neuron* colt = l->top_left; colt; colt = colt->right) {
+				col++;
+				for (Neuron* n = colt; n; n = n->down) {
+					if (n->id == id) {
+						
+						return n;
+					}
+
+					row++;
+
+				}
+				row = 0;
+			}
+
+		}
+
+		return nullptr;
+	}
+
 
 	//!!!!!!!!!!!!!!!!!prapogation!!!!!!!!!!!!!!!!!
 	char forwardPropagate(char inputLetter);
@@ -324,6 +317,136 @@ public:
 	void backwardPropagate(char targetLetter);
 
 private:
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!! Helper functions sections !!!!!!!!!!!!!!!!
+
+	Layer* ownerLayer(Neuron* target) {
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+			for (Neuron* colt = l->top_left; colt != nullptr; colt = colt->right) {
+				for (Neuron* n = colt; n != nullptr; n = n->down) {
+					if (n == target) return l;
+				}
+			}
+		}
+	}
+
+	
+	PlacementSpot findPlacementSpot() {
+		Layer* target = nullptr;
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+			if (l->current_count < l->N * l->N) {
+				target = l;
+				break;
+			}
+		}
+
+		if (target == nullptr) {
+			int newId = tail_layer ? tail_layer->layerId + 1 : 0;
+			target = createLayer(N, newId, nullptr, tail_layer);
+			if (tail_layer)
+				tail_layer->next = target;
+			tail_layer = target;
+
+			if (head_layer == nullptr) head_layer = target;
+		}
+
+		int bestCol = -1, bestRow = -1;
+		double bestWeight = -1.0;
+
+		for (int c = 0; c < target->N; c++) {
+			int h = columnHeight(target, c);
+			if (h >= target->N) continue;
+			double w = columnWeight(target, c);
+			if (bestCol == -1 || w < bestWeight) {
+				bestCol = c;
+				bestRow = h;
+				bestWeight = w;
+			}
+		}
+
+		return { target, bestRow, bestCol };
+	}
+
+
+	Neuron* placeNeuronAt(Layer* l, int row, int col, int id, double weight) {
+		Neuron* n = new Neuron();
+		n->id = id;
+		n->weight = weight;
+		n->up = n->down = n->left = n->right = nullptr;
+		n->head_axon = nullptr;
+
+		if (row == 0) {
+			if (col == 0) {
+				l->top_left = n;
+			}
+			else {
+				Neuron* leftCol = columnTop(l, col - 1);
+				n->left = leftCol;
+				if (leftCol) leftCol->right = n;
+			}
+		}
+		else {
+			Neuron* bottom = columnTop(l, col);
+			while (bottom->down != nullptr) bottom = bottom->down;
+			bottom->down = n;
+			n->up = bottom;
+
+			Neuron* leftNeighbor = silentNeuronReturnByPosition(l->layerId, row, col - 1);
+			if (leftNeighbor) {
+				n->left = leftNeighbor;
+				leftNeighbor->right = n;
+			}
+			Neuron* rightNeighbor = silentNeuronReturnByPosition(l->layerId, row, col + 1);
+			if (rightNeighbor) {
+				n->right = rightNeighbor; 
+				rightNeighbor->left = n;
+			}
+
+			
+		} 
+
+		l->current_count++;
+		return n;
+	}
+
+
+	void wireNeuronConnections(Layer* l, Neuron* n, int row, int col) {
+		if (l->next != nullptr) {
+			Neuron* aligned = silentNeuronReturnByPosition(l->next->layerId, row, col);
+			if (aligned != nullptr) {
+				addSynapse(n, aligned->up, 'U');
+				addSynapse(n, aligned->down, 'D');
+				addSynapse(n, aligned->left, 'L');
+				addSynapse(n, aligned->right, 'R');
+			}
+		}
+
+		if (l->prev != nullptr) {
+			struct Mirror { int dr, dc; char dir; };
+
+			Mirror mirrors[4] = {
+				{1, 0, 'U'},
+				{-1, 0, 'D'},
+				{0, 1, 'L'},
+				{0, -1, 'R'},
+			};
+
+			for (int i = 0; i < 4; i++) {
+				int pr = row + mirrors[i].dr;
+				int pc = col + mirrors[i].dc;
+				if (pr < 0 || pc < 0) continue;
+				Neuron* p = silentNeuronReturnByPosition(l->prev->layerId, pr, pc);
+				if (p != nullptr) addSynapse(p, n, mirrors[i].dir);
+			}
+
+		}
+
+
+	}
+
+
+
 	// private helper functions for accomplshing a specific task
 	Layer* createLayer(int N, int layerId, Layer* next, Layer* prev) {
 		Layer* newLayer = new Layer();
@@ -342,7 +465,7 @@ private:
 
 		if (from == nullptr || to == nullptr) return;
 		Synapse* s = new Synapse();
-		
+
 		s->weight = (from->weight + to->weight) / 4.0;
 		s->is_active = false;
 		s->direction = dir;
@@ -353,7 +476,7 @@ private:
 	}
 
 	void setSynapseWeight(int id, char dir, double newWeight) {
-		Neuron* source = findNeuronById(id);
+		Neuron* source = silentNeuronReturnById(id);
 
 		if (source == nullptr) {
 			cout << "No neuron with id " << id << endl;
@@ -361,7 +484,7 @@ private:
 		}
 
 		for (Synapse* s = source->head_axon; s != nullptr; s = s->next_synapse) {
-			
+
 			if (s->direction == dir) {
 				s->weight = newWeight;
 				return;
@@ -369,34 +492,54 @@ private:
 		}
 
 		cout << "Neuron " << id << " has no synapse in direction " << dir << endl;
-	} 
+	}
 
 	void buildAllSynapses() {
 		for (Layer* l = head_layer; l != nullptr && l->next != nullptr; l = l->next) {
 			Layer* lnext = l->next;
 
-			Neuron* srcRow = l->top_left;
-			Neuron* tgtRow = lnext->top_left;
+			int col = 0;
 
-			while (srcRow != nullptr) {
-				Neuron* src = srcRow;
-				Neuron* aligned = tgtRow;
-
-				while (src != nullptr) {
-					if (aligned != nullptr) {
+			for (Neuron* colt = l->top_left; colt; colt = colt->right, col++) {
+				int row = 0;
+				for (Neuron* src = colt; src; src = src->down, row++) {
+					Neuron* aligned = silentNeuronReturnByPosition(lnext->layerId, row, col);
+					if (aligned) {
 						addSynapse(src, aligned->up, 'U');
 						addSynapse(src, aligned->down, 'D');
 						addSynapse(src, aligned->left, 'L');
 						addSynapse(src, aligned->right, 'R');
 					}
-
-					src = src->right;
-					aligned = (aligned != nullptr) ? aligned->right : nullptr;
 				}
-
-				srcRow = srcRow->down;
-				tgtRow = (tgtRow != nullptr) ? tgtRow->down : nullptr;
 			}
 		}
 	}
+
+	int columnHeight(Layer* l, int col) {
+		int h = 0;
+		for (Neuron* n = columnTop(l, col); n != nullptr; n = n->down) h++;
+		
+		return h;
+	}
+
+	Neuron* columnTop(Layer* l, int col) {
+		Neuron* c = l->top_left;
+		for (int i = 0; i < col && c != nullptr; i++)
+			c = c->right;
+		return c;
+	}
+
+
+
+
+	public:
+		double columnWeight(Layer* l, int col) {
+			double sum = 0.0;
+			for (Neuron* n = columnTop(l, col); n != nullptr; n = n->down) {
+				sum += n->weight;
+			}
+
+			return sum;
+		}
+
 };
