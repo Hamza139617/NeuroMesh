@@ -547,7 +547,7 @@ private:
 	}
 
 	
-	void orderColumns() {
+	void orderColumns(Layer* head_layer) {
 		// basically for ordering the columns
 
 		double weight1;
@@ -557,46 +557,99 @@ private:
 		int row = 0;
 
 		Neuron* secondN = nullptr;
-		Neuron* temp = nullptr;
+		Neuron* leftNeighbor = nullptr;
+		Neuron* rightNeighbor = nullptr;
+
 
 		for (Layer* l = head_layer; l != nullptr; l = l->next) {
 
-			col = 0;
+			bool changed = true;
 
-			for (Neuron* n = l->top_left; n->right != nullptr; n = n->right, col++) {
+			while (changed) {
+				changed = false;
+				col = 0;
 
-				weight1 = columnWeight(l, col);
-				weight2 = columnWeight(l, col + 1);
+				for (Neuron* n = l->top_left; n && n->right != nullptr; n = n->right, col++) {
+					weight1 = columnWeight(l, col);
+					weight2 = columnWeight(l, col + 1);
 
-				if (weight1 > weight2) {
-					// checking if the total weight of one column is more then the total weight of the other column
-					// in this case swap
+					if (weight1 > weight2) {
+						// checking fi the total weight of one column is more than the total weight of the other column
 
-					for (Neuron* firstN = n; firstN; firstN = firstN->down, row++) {
-						secondN = firstN->right;
+						Neuron* firstN = n;
+						secondN = n->right;
+						row = 0;
 
-						firstN->right = secondN->right;
-						secondN->right = firstN;
-						
-						if (firstN->right) {
-							firstN->right->left = firstN;
+						while (firstN != nullptr || secondN != nullptr) {
+							Neuron* nowAtCol = secondN;
+							Neuron* nowAtNextCol = firstN;
+
+							
+							leftNeighbor = (col > 0) ? silentNeuronReturnByPosition(l->layerId, row, col - 1) : nullptr;
+							rightNeighbor = silentNeuronReturnByPosition(l->layerId, row, col + 2);
+
+							if (nowAtCol) {
+								nowAtCol->left = leftNeighbor;
+								nowAtCol->right = nowAtNextCol;
+							}
+							if (nowAtNextCol) {
+								nowAtNextCol->left = nowAtCol;
+								nowAtNextCol->right = rightNeighbor;
+							}
+
+							if (leftNeighbor) leftNeighbor->right = nowAtCol;
+							else if (row == 0) l->top_left = nowAtCol;
+
+							if (rightNeighbor) rightNeighbor->left = nowAtNextCol;
+
+							if (nowAtCol) clearAxons(nowAtCol);
+							if (nowAtNextCol) clearAxons(nowAtNextCol);
+
+							Neuron* aligned1 = nullptr;
+
+							if (nowAtCol) {
+								if (l->next) aligned1 = silentNeuronReturnByPosition(l->next->layerId, row, col);
+								if (aligned1) {
+
+									addSynapse(nowAtCol, aligned1->up, 'U');
+									addSynapse(nowAtCol, aligned1->down, 'D');
+									addSynapse(nowAtCol, aligned1->left, 'L');
+									addSynapse(nowAtCol, aligned1->right, 'R');
+
+
+								}
+							}
+
+							aligned1 = nullptr;
+
+							
+								if (nowAtNextCol) {
+									if (l->next) aligned1 = silentNeuronReturnByPosition(l->next->layerId, row, col + 1);
+
+									if (aligned1) {
+										addSynapse(nowAtNextCol, aligned1->up, 'U');
+										addSynapse(nowAtNextCol, aligned1->down, 'D');
+										addSynapse(nowAtNextCol, aligned1->left, 'L');
+										addSynapse(nowAtNextCol, aligned1->right, 'R');
+
+									}
+								}
+
+								if (firstN) firstN = firstN->down;
+								if (secondN) secondN = secondN->down;
+								row++;
+							
+
+							
 						}
 
-						secondN->left = firstN->left;
-						firstN->left = secondN;
-
-
-
-
+						changed = true;
+						break;
 					}
-					row = 0;
 				}
-
 			}
-
-			
-
 		}
+
 
 	}
 
