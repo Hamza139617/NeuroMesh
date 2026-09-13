@@ -119,6 +119,9 @@ public:
 	//=============triggering================
 	void pruneNeuron(Neuron* n);
 	Neuron* mergeNeurons(Synapse* s);
+
+
+
 	Neuron* mergeColumns(Neuron* columnA_any, Neuron* columnB_any) {
 		// for merging of the columns
 		// both neurons are the head neurons of the respective column
@@ -126,6 +129,7 @@ public:
 
 		Neuron* firstN = columnA_any;
 		Neuron* secondN = columnB_any;
+		Neuron* front = nullptr;
 
 		// floor average calculating 
 		double newWeight;
@@ -140,6 +144,8 @@ public:
 		
 		int row, col;
 		row = col = 0;
+		
+		Neuron* oldN = nullptr;
 
 		while (firstN && secondN) {
 
@@ -171,16 +177,37 @@ public:
 			// finding the owner layer
 			Layer* owner = ownerLayer(firstN);
 
+			row = 0;
+			col = 0;
+
 			findNeuronPos(owner, row, col, firstN);
 
 
+			if (owner->next) {
+				front = silentNeuronReturnByPosition(owner->next->layerId, row, col);
+				if (front) {
+					addSynapse(newNeuron, front->up, 'U');
+					addSynapse(newNeuron, front->down, 'D');
+					addSynapse(newNeuron, front->left, 'L');
+					addSynapse(newNeuron, front->right, 'R');
+				}
+			}
 
+			front = nullptr;
+			oldN = firstN;
+			firstN = firstN->down;
+			delete oldN;
 
+			oldN = secondN;
+			secondN = secondN->down;
+			delete oldN;
 
 
 		}
 
 	}
+
+
 	Layer* mergeLayers(Layer* a, Layer* b);
 	void removeEmptyLayer(Layer* l);
 
