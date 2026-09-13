@@ -127,7 +127,7 @@ public:
 		findNeuronPos(owner, row, col, ned);
 
 
-		clearAxons(ned);
+		clearAxons(ned); // clearing the axons of the neuron
 
 
 		Neuron* current = ned;
@@ -138,11 +138,12 @@ public:
 			current->weight = below->weight;
 			current = below;
 			below = below->down;
+			// cout << "hi";
 		}
 
 		Neuron* last = current;
 
-		// neuron conection rewiring
+		// neuron conection rewirrring
 
 
 		if (last->left) last->left->right = last->right;
