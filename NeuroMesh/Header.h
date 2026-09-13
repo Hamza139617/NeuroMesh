@@ -119,7 +119,63 @@ public:
 	//=============triggering================
 	void pruneNeuron(Neuron* n);
 	Neuron* mergeNeurons(Synapse* s);
-	Neuron* mergeColumns(Neuron* columnA_any, Neuron* columnB_any);
+	Neuron* mergeColumns(Neuron* columnA_any, Neuron* columnB_any) {
+		// for merging of the columns
+		// both neurons are the head neurons of the respective column
+		if (!columnA_any || !columnB_any) return;
+
+		Neuron* firstN = columnA_any;
+		Neuron* secondN = columnB_any;
+
+		// floor average calculating 
+		double newWeight;
+
+
+		// setting vlue of neuron the new 
+		Neuron* newNeuron = new Neuron();
+		newNeuron->weight = newWeight;
+		newNeuron->id = columnA_any->id;
+		newNeuron->left = newNeuron->right = newNeuron->up = newNeuron->down = nullptr;
+		newNeuron->head_axon = nullptr;
+		
+
+
+		while (firstN && secondN) {
+
+			newWeight = (int)((firstN->weight + secondN->weight) / 2);
+
+			Neuron* newNeuron = new Neuron();
+			newNeuron->weight = newWeight;
+			newNeuron->id = firstN->id;
+			newNeuron->left = newNeuron->right = newNeuron->up = newNeuron->down = nullptr;
+			newNeuron->head_axon = nullptr;
+
+
+			if (firstN->left) {
+				firstN->left->right = newNeuron;
+				newNeuron->left = firstN->left;
+			}
+			if (secondN->right) {
+				secondN->right->left = newNeuron;
+				newNeuron->right = secondN->right;
+			}
+
+			if (firstN) clearAxons(firstN);
+			if (secondN) clearAxons(secondN);
+
+
+
+			// setting up the axons of the newNeuron
+			
+			// finding the owner layer
+			Layer* owner = ownerLayer(firstN);
+
+
+
+
+		}
+
+	}
 	Layer* mergeLayers(Layer* a, Layer* b);
 	void removeEmptyLayer(Layer* l);
 
@@ -320,6 +376,14 @@ private:
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!! Helper functions sections !!!!!!!!!!!!!!!!
 
+
+	void findNeuronPos(Layer* l,int& row, int& col ) {
+		if (!l) return;
+
+
+
+	}
+
 	Layer* ownerLayer(Neuron* target) {
 		for (Layer* l = head_layer; l != nullptr; l = l->next) {
 			for (Neuron* colt = l->top_left; colt != nullptr; colt = colt->right) {
@@ -516,7 +580,8 @@ private:
 		}
 	}
 
-	//! column ordering and management functions 
+	//! column ordering and management functions including the column mergin functions
+
 
 	int columnHeight(Layer* l, int col) {
 		int h = 0;
@@ -575,7 +640,7 @@ private:
 
 					if (weight1 > weight2) {
 						// checking fi the total weight of one column is more than the total weight of the other column
-
+						   
 						Neuron* firstN = n;
 						secondN = n->right;
 						row = 0;
@@ -666,6 +731,9 @@ private:
 
 			return sum;
 		}
+
+
+		
 
 
 };
