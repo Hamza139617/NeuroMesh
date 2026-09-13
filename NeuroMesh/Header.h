@@ -170,6 +170,7 @@ public:
 
 
 		rebuildLayerForwardSynapses(owner);
+		if (owner->prev) rebuildLayerForwardSynapses(owner->prev);
 
 
 		orderColumns(head_layer);
@@ -188,7 +189,176 @@ public:
 	}
 
 	//=============triggering================
-	void pruneNeuron(Neuron* n);
+	void pruneNeuron(Neuron* n) {
+		// prunging the neuron and compacting the grid
+		// if no n then return 
+		if (!n) return;
+
+		// if conditon not satisfied return
+		if (n->weight <= pthreshold) return;
+
+
+		int row = 0;
+		int col = 0;
+
+		Layer* owner = ownerLayer(n);
+
+		Neuron* left = n->left;
+		Neuron* right = n->right;
+		Neuron* up = n->up;
+		Neuron* down = n->down;
+
+		if (left) clearAxons(left);
+		if (right) clearAxons(right);
+		if (up) clearAxons(up);
+		if (down) clearAxons(down);
+
+		Neuron* current = left;
+
+		Neuron* inward = left->left;
+
+		while (inward != nullptr && current) {
+			current->id = inward->id;
+			current->weight = inward->weight;
+			current = inward;
+			inward = inward->left;
+		}
+
+		Neuron* last = current;
+
+		if (last->left) last->left->right = last->right;
+		if (last->right) last->right->left = last->left;
+		if (last->up) last->up->down = last->down;
+		if (last->down) last->down->up = last->up;
+
+		if (last == owner->top_left) {
+			if (last->right) {
+				owner->top_left = last->right;
+			}
+			else if (last->down) {
+				Neuron* newTop = last->down;
+				while (newTop->left) newTop = newTop->left;
+				owner->top_left = newTop;
+			}
+			else {
+				owner->top_left = nullptr;
+			}
+		}
+
+		
+		 current = right;
+
+		 inward = right->right;
+
+		while (inward != nullptr && current) {
+			current->id = inward->id;
+			current->weight = inward->weight;
+			current = inward;
+			inward = inward->right;
+		}
+
+		 Neuron* last2 = current;
+
+		if (last2->left) last2->left->right = last2->right;
+		if (last2->right) last2->right->left = last2->left;
+		if (last2->up) last2->up->down = last2->down;
+		if (last2->down) last2->down->up = last2->up;
+
+		if (last2 == owner->top_left) {
+			if (last2->right) {
+				owner->top_left = last2->right;
+			}
+			else if (last2->down) {
+				Neuron* newTop = last2->down;
+				while (newTop->left) newTop = newTop->left;
+				owner->top_left = newTop;
+			}
+			else {
+				owner->top_left = nullptr;
+			}
+		}
+
+
+		 current = up;
+
+		 inward = up->up;
+
+		while (inward != nullptr && current) {
+			current->id = inward->id;
+			current->weight = inward->weight;
+			current = inward;
+			inward = inward->up;
+		}
+
+		Neuron* last3 = current;
+
+		if (last3->left) last3->left->right = last3->right;
+		if (last3->right) last3->right->left = last3->left;
+		if (last3->up) last3->up->down = last3->down;
+		if (last3->down) last3->down->up = last3->up;
+
+		if (last3 == owner->top_left) {
+			if (last3->right) {
+				owner->top_left = last3->right;
+			}
+			else if (last3->down) {
+				Neuron* newTop = last3->down;
+				while (newTop->left) newTop = newTop->left;
+				owner->top_left = newTop;
+			}
+			else {
+				owner->top_left = nullptr;
+			}
+		}
+
+
+
+		 current = down;
+
+		 inward = down->down;
+
+		while (inward != nullptr && current) {
+			current->id = inward->id;
+			current->weight = inward->weight;
+			current = inward;
+			inward = inward->left;
+		}
+
+		Neuron* last4 = current;
+
+		if (last4->left) last4->left->right = last4->right;
+		if (last4->right) last4->right->left = last4->left;
+		if (last4->up) last4->up->down = last4->down;
+		if (last4->down) last4->down->up = last4->up;
+
+		if (last4 == owner->top_left) {
+			if (last4->right) {
+				owner->top_left = last4->right;
+			}
+			else if (last4->down) {
+				Neuron* newTop = last4->down;
+				while (newTop->left) newTop = newTop->left;
+				owner->top_left = newTop;
+			}
+			else {
+				owner->top_left = nullptr;
+			}
+		}
+
+
+		delete last;
+		delete last2;
+		delete last3;
+		delete last4;
+		owner->current_count -= 4;
+
+		rebuildLayerForwardSynapses(owner);
+		if (owner->prev) rebuildLayerForwardSynapses(owner->prev);
+
+		orderColumns(head_layer);
+
+	}
+
 	Neuron* mergeNeurons(Synapse* s);
 
 
@@ -346,7 +516,55 @@ public:
 		}
 
 	}
-	void exportMesh(const std::string& fileName);
+	void exportMesh(const std::string& fileName) {
+		// the man functin for export the mesh in to a text file
+
+		ofstream fout(fileName);
+
+		if (!fout) {
+			cout << " Coudln't be able to open the file" << endl;
+			return;
+		}
+
+		fout << "=========================================NEUROMESH==================================" << endl;
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+
+			fout << "Layer ID " << l->layerId << endl << endl;
+			int col = 0;
+
+			for (Neuron* colt = l->top_left; colt != nullptr; colt = colt->right, col++) {
+				int row = 0;
+
+				for (Neuron* n = colt; n != nullptr; n = n->down, row++) {
+					fout << "Neuron ID:" << n->id << " Weight: " << n->weight << " Axon list : ";
+
+					Synapse* s = n->head_axon;
+
+					if (s == nullptr) {
+						fout << "  NONE";
+					}
+					int temp = 1;
+					while (s != nullptr) {
+						fout << " " << temp << "  ==>Target ID: ";
+						if (s->target_neuron) fout << s->target_neuron->id;
+						else fout << " NONE ";
+						s = s->next_synapse;
+						temp++;
+					}
+
+					fout << endl << endl;
+
+				}
+			}
+
+			fout << "=========================================================================================" << endl;
+
+		}
+
+		fout.close();
+
+	}
 
 	void navigateMesh();
 
