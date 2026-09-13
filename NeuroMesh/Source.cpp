@@ -7,7 +7,15 @@ int main() {
 
 	m.loadFromFile("mesh.txt");
 
-		
+	m.printLayer(2);
+
+	m.deleteNeuron(1);
+	m.deleteNeuron(2);
+	m.deleteNeuron(3);
+	m.deleteNeuron(4);
+	m.deleteNeuron(5);
+
+	m.printLayer(1);
 	
 
 

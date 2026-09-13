@@ -84,6 +84,7 @@ public:
 		cout << "Inserted neuron id " << id << " Layer : " << spot.layer->layerId << endl;
 		cout << " row " << spot.row << " col " << spot.col << endl;
 
+		orderColumns(head_layer);
 	}
 
 
@@ -113,8 +114,77 @@ public:
 
 	//==============deleting=================
 
-	void deleteNeuron(int id);
-	void deleteLayer(int layerId);
+	void deleteNeuron(int id) {
+		Neuron* ned = silentNeuronReturnById(id);
+		if (!ned) return;
+
+		Layer* owner = ownerLayer(ned);
+		if (!owner) return;
+
+		// Find the position before changing any of the grid links.
+		int row = 0;
+		int col = 0;
+		findNeuronPos(owner, row, col, ned);
+
+
+		clearAxons(ned);
+
+
+		Neuron* current = ned;
+		Neuron* below = current->down;
+
+		while (below != nullptr) { // basically for closing the gap 
+			current->id = below->id;
+			current->weight = below->weight;
+			current = below;
+			below = below->down;
+		}
+
+		Neuron* last = current;
+
+		// neuron conection rewiring
+
+
+		if (last->left) last->left->right = last->right;
+		if (last->right) last->right->left = last->left;
+		if (last->up) last->up->down = last->down;
+		if (last->down) last->down->up = last->up;
+
+		if (last == owner->top_left) {
+			if (last->right) {
+				owner->top_left = last->right;
+			}
+			else if (last->down) {
+				Neuron* newTop = last->down;
+				while (newTop->left) newTop = newTop->left;
+				owner->top_left = newTop;
+			}
+			else {
+				owner->top_left = nullptr;
+			}
+		}
+
+		delete last;
+		owner->current_count--;
+
+
+		rebuildLayerForwardSynapses(owner);
+
+
+		orderColumns(head_layer);
+	}
+
+	void deleteLayer(int layerId) {
+		for (Layer* l = head_layer; l; l = l->next) {
+			if (l->layerId == layerId) {
+				delete l;
+				l = nullptr;
+				return;
+			}
+		}
+
+		return;
+	}
 
 	//=============triggering================
 	void pruneNeuron(Neuron* n);
@@ -125,91 +195,123 @@ public:
 	Neuron* mergeColumns(Neuron* columnA_any, Neuron* columnB_any) {
 		// for merging of the columns
 		// both neurons are the head neurons of the respective column
-		if (!columnA_any || !columnB_any) return;
+		if (!columnA_any || !columnB_any) return nullptr;
+
+		Layer* owner = ownerLayer(columnA_any);
+		if (!owner) return nullptr;
+
+		int colA = 0, dummyRow = 0;
+		findNeuronPos(owner, dummyRow, colA, columnA_any);
+
+		int colB = colA + 1;
 
 		Neuron* firstN = columnA_any;
 		Neuron* secondN = columnB_any;
-		Neuron* front = nullptr;
 
-		// floor average calculating 
+		Neuron* leftB = (colA > 0) ? columnTop(owner, colA - 1) : nullptr;
+		Neuron* rightB = columnTop(owner, colB + 1);
+
 		double newWeight;
-
-
-		// setting vlue of neuron the new 
-		Neuron* newNeuron = new Neuron();
-		newNeuron->weight = newWeight;
-		newNeuron->id = columnA_any->id;
-		newNeuron->left = newNeuron->right = newNeuron->up = newNeuron->down = nullptr;
-		newNeuron->head_axon = nullptr;
-		
-		int row, col;
-		row = col = 0;
-		
+		int row = 0;
 		Neuron* oldN = nullptr;
-
-		while (firstN && secondN) {
-
-			newWeight = (int)((firstN->weight + secondN->weight) / 2);
-
-			Neuron* newNeuron = new Neuron();
-			newNeuron->weight = newWeight;
-			newNeuron->id = firstN->id;
-			newNeuron->left = newNeuron->right = newNeuron->up = newNeuron->down = nullptr;
-			newNeuron->head_axon = nullptr;
+		Neuron* mergedTop = nullptr;
+		Neuron* mergedBottom = nullptr;
 
 
-			if (firstN->left) {
-				firstN->left->right = newNeuron;
-				newNeuron->left = firstN->left;
+		while (firstN || secondN) {
+			Neuron* newNeuron;
+
+			if (firstN && secondN) {
+
+				newWeight = floor((firstN->weight + secondN->weight) / 2.0);
+
+				newNeuron = new Neuron();
+				newNeuron->weight = newWeight;
+				newNeuron->id = firstN->id;
+				newNeuron->left = newNeuron->right = newNeuron->up = newNeuron->down = nullptr;
+				newNeuron->head_axon = nullptr;
+
+				clearAxons(firstN);
+				clearAxons(secondN);
+
+				oldN = firstN;
+				firstN = firstN->down;
+				delete oldN;
+				oldN = secondN;
+				secondN = secondN->down;
+				delete oldN;
+
 			}
-			if (secondN->right) {
-				secondN->right->left = newNeuron;
-				newNeuron->right = secondN->right;
+			else if (firstN) {
+				newNeuron = firstN;
+				clearAxons(newNeuron);
+				firstN = firstN->down;
+			}
+			else {
+				newNeuron = secondN;
+				clearAxons(newNeuron);
+				secondN = secondN->down;
 			}
 
-			if (firstN) clearAxons(firstN);
-			if (secondN) clearAxons(secondN);
+			newNeuron->left = leftB;
+			newNeuron->right = rightB;
+			if (leftB) leftB->right = newNeuron;
+			else if (row == 0) owner->top_left = newNeuron;
+			if (rightB) rightB->left = newNeuron;
+			mergedBottom = newNeuron;
 
-
-
-			// setting up the axons of the newNeuron
+			if (leftB) leftB = leftB->down;
+			if (rightB) rightB = rightB->down;
 			
-			// finding the owner layer
-			Layer* owner = ownerLayer(firstN);
-
-			row = 0;
-			col = 0;
-
-			findNeuronPos(owner, row, col, firstN);
-
-
-			if (owner->next) {
-				front = silentNeuronReturnByPosition(owner->next->layerId, row, col);
-				if (front) {
-					addSynapse(newNeuron, front->up, 'U');
-					addSynapse(newNeuron, front->down, 'D');
-					addSynapse(newNeuron, front->left, 'L');
-					addSynapse(newNeuron, front->right, 'R');
-				}
-			}
-
-			front = nullptr;
-			oldN = firstN;
-			firstN = firstN->down;
-			delete oldN;
-
-			oldN = secondN;
-			secondN = secondN->down;
-			delete oldN;
-
-
+			row++;
 		}
+
+		rebuildLayerForwardSynapses(owner);
+		rebuildLayerForwardSynapses(owner->prev);
+
+		return mergedTop;
 
 	}
 
 
+	void rebuildLayerForwardSynapses(Layer* l) {
+		if (!l || !l->next) return;
+		int col = 0;
+
+		for (Neuron* colt = l->top_left; colt; colt = colt->right, col++) {
+			int row = 0;
+			for (Neuron* n = colt; n; n = n->down, row++) {
+				clearAxons(n);
+				Neuron* aligned = silentNeuronReturnByPosition(l->next->layerId, row, col);
+				if (aligned) {
+					addSynapse(n, aligned->up, 'U');
+					addSynapse(n, aligned->down, 'D');
+					addSynapse(n, aligned->left, 'L');
+					addSynapse(n, aligned->right, 'R');
+				}
+			}
+		}
+	}
+
+
 	Layer* mergeLayers(Layer* a, Layer* b);
-	void removeEmptyLayer(Layer* l);
+	void removeEmptyLayer(Layer* l) {
+		if (!l) return;
+
+		if (l->current_count > 0) return;
+
+		if (l->layerId == 0) {
+			head_layer = l->next;
+		}
+		else {
+			l->prev->next = l->next;
+			if (l->next) l->next->prev = l->prev;
+			rebuildLayerForwardSynapses(l->prev);
+		}
+
+		deleteLayer(l->layerId);
+		
+	}
 
 
 
@@ -231,10 +333,10 @@ public:
 				Neuron* st = n;
 
 				for (; n->right != nullptr; n = n->right) {
-					cout << n->weight << " ";
+					cout << n->id << " ";
 				}
 
-				cout << n->weight << endl;
+				cout << n->id << endl;
 
 				n = st->down;
 			}
@@ -752,6 +854,11 @@ private:
 							
 						}
 
+						changed = true;
+						break;
+					}
+					else if (weight1 == weight2) {
+						mergeColumns(n, n->right);
 						changed = true;
 						break;
 					}
