@@ -138,7 +138,8 @@ public:
 		newNeuron->left = newNeuron->right = newNeuron->up = newNeuron->down = nullptr;
 		newNeuron->head_axon = nullptr;
 		
-
+		int row, col;
+		row = col = 0;
 
 		while (firstN && secondN) {
 
@@ -169,6 +170,10 @@ public:
 			
 			// finding the owner layer
 			Layer* owner = ownerLayer(firstN);
+
+			findNeuronPos(owner, row, col, firstN);
+
+
 
 
 
@@ -377,10 +382,22 @@ private:
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!! Helper functions sections !!!!!!!!!!!!!!!!
 
 
-	void findNeuronPos(Layer* l,int& row, int& col ) {
+	void findNeuronPos(Layer* l,int& row, int& col , Neuron* n) {
 		if (!l) return;
 
+		row = 0;
+		col = 0;
 
+		for (Neuron* coln = l->top_left; coln; coln = coln->right, col++) {
+
+			row = 0;
+			for (Neuron* rown = coln; rown; rown = rown->down, row++) {
+
+				if (rown->id == n->id) return;
+
+			}
+
+		}
 
 	}
 
