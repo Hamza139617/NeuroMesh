@@ -426,7 +426,44 @@ public:
 		while (true) {
 			Layer* nextOuterLayer = vacLayer->next;
 			Synapse* best = nextOuterLayer ? findBestCandidate(travelingAxons) : nullptr;
+
+			Synapse* freeMe = travelingAxons;
+			while (freeMe) {
+				Synapse* nx = freeMe->next_synapse;
+				if (freeMe != best) delete freeMe;
+				freeMe = nx;
+			}
+
+			if (!best) {
+				bypassVacantSlot(vacLayer, vacUp, vacDown, vacLeft, vacRight);
+				break;
+			}
+
+			Neuron* promoted = best->target_neuron;
+			delete best;
+
+			Neuron* promUp = promoted->up;
+			Neuron* promDown = promoted->down;
+			Neuron* promLeft = promoted->left;
+			Neuron* promRight = promoted->right;
+			Synapse* promotedAxons = promoted->head_axon;
+			promoted->head_axon = nullptr;
+
+			placeIntoVacancy(promoted, vacUp, vacDown, vacLeft, vacRight, vacLayer);
+			vacLayer->current_count++;
+			nextOuterLayer->current_count--;
+
+			vacUp = promUp;
+			vacDown = promDown;
+			vacLeft = promLeft;
+			vacRight = promRight;
+			vacLayer = nextOuterLayer;
+			travelingAxons = promotedAxons;
 		}
+
+		for (Layer* l = head_layer; l != nullptr; l = l->next) rebuildLayerForwardSynapses(l);
+
+		return sourceNeuron;
 	}
 
 
@@ -796,6 +833,54 @@ public:
 private:
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!! Helper functions sections !!!!!!!!!!!!!!!!
+
+	int dirPriority(char d) {
+		if (d == 'L') return 0;
+		if (d == 'R') return 1;
+		if (d == 'U') return 2;
+		return 3;
+	}
+
+
+	
+
+
+	void placeIntoVacancy(Neuron* moving, Neuron* vacUp, Neuron* vacDown, Neuron* vacLeft, Neuron* vacRight, Layer* vacLayer) {
+		moving->up = vacUp;
+		moving->down = vacDown;
+		moving->left = vacLeft;
+		moving->right = vacRight;
+		if (vacUp) vacUp->down = moving;
+		if (vacDown) vacDown->up = moving;
+		if (vacLeft) vacLeft->right = moving;
+		if (vacRight) vacRight->left = moving;
+		if (vacUp == nullptr && vacLeft == nullptr) vacLayer->top_left = moving;
+ 	}
+
+	void bypassVacantSlot(Layer* layer, Neuron* up, Neuron* down, Neuron* left, Neuron* right) {
+		if (up != nullptr) {
+			up->down = down;
+			if (down) down->up = up;
+			if (left) left->right = right;
+			if (right) right->left = left;
+
+		}
+		else {
+			if (down != nullptr) {
+				down->up = nullptr;
+				down->left = left;
+				down->right = right;
+				if (left) left->right = down;
+				else layer->top_left = down;
+
+			}
+			else {
+				if (left) left->right = right;
+				else layer->top_left = right;
+				if (right) right->left = left;
+			}
+		}
+	}
 
 
 	void findNeuronPos(Layer* l,int& row, int& col , Neuron* n) {
