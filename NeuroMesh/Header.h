@@ -188,13 +188,11 @@ public:
 		return;
 	}
 
-	//=============triggering================
 	void pruneNeuron(Neuron* n) {
-		// prunging the neuron and compacting the grid
-		// if no n then return 
+		// if no n then return
 		if (!n) return;
 
-		// if conditon not satisfied return
+		// if condition not satisfied return
 		if (n->weight <= pthreshold) return;
 
 
@@ -202,6 +200,7 @@ public:
 		int col = 0;
 
 		Layer* owner = ownerLayer(n);
+		if (!owner) return;// catching owner
 
 		Neuron* left = n->left;
 		Neuron* right = n->right;
@@ -213,153 +212,222 @@ public:
 		if (up) clearAxons(up);
 		if (down) clearAxons(down);
 
-		Neuron* current = left;
+		
+		if (left) {
+			Neuron* current = left;
+			Neuron* inward = left->left;
 
-		Neuron* inward = left->left;
-
-		while (inward != nullptr && current) {
-			current->id = inward->id;
-			current->weight = inward->weight;
-			current = inward;
-			inward = inward->left;
-		}
-
-		Neuron* last = current;
-
-		if (last->left) last->left->right = last->right;
-		if (last->right) last->right->left = last->left;
-		if (last->up) last->up->down = last->down;
-		if (last->down) last->down->up = last->up;
-
-		if (last == owner->top_left) {
-			if (last->right) {
-				owner->top_left = last->right;
+			while (inward != nullptr) {
+				current->id = inward->id;
+				current->weight = inward->weight;
+				current = inward;
+				inward = inward->left;
 			}
-			else if (last->down) {
-				Neuron* newTop = last->down;
-				while (newTop->left) newTop = newTop->left;
-				owner->top_left = newTop;
+
+			Neuron* last = current;
+
+			if (last->left) last->left->right = last->right;
+			if (last->right) last->right->left = last->left;
+			if (last->up) last->up->down = last->down;
+			if (last->down) last->down->up = last->up;
+
+			if (last == owner->top_left) {
+				if (last->down) {
+					Neuron* promoted = last->down;
+					promoted->up = nullptr;
+					promoted->left = last->left;
+					promoted->right = last->right;
+					if (last->right) last->right->left = promoted;
+					owner->top_left = promoted;
+				}
+				else if (last->right) {
+					owner->top_left = last->right;
+				}
+				else {
+					owner->top_left = nullptr;
+				}
 			}
-			else {
-				owner->top_left = nullptr;
-			}
+
+			delete last;
+			owner->current_count--;
 		}
 
 		
-		 current = right;
+		if (right) {
+			Neuron* current = right;
+			Neuron* inward = right->right;
 
-		 inward = right->right;
+			while (inward != nullptr) {
+				current->id = inward->id;
+				current->weight = inward->weight;
+				current = inward;
+				inward = inward->right;
+			}
 
-		while (inward != nullptr && current) {
-			current->id = inward->id;
-			current->weight = inward->weight;
-			current = inward;
-			inward = inward->right;
+			Neuron* last2 = current;
+
+			if (last2->left) last2->left->right = last2->right;
+			if (last2->right) last2->right->left = last2->left;
+			if (last2->up) last2->up->down = last2->down;
+			if (last2->down) last2->down->up = last2->up;
+
+			if (last2 == owner->top_left) {
+				if (last2->down) {
+					Neuron* promoted = last2->down;
+					promoted->up = nullptr;
+					promoted->left = last2->left;
+					promoted->right = last2->right;
+					if (last2->right) last2->right->left = promoted;
+					owner->top_left = promoted;
+				}
+				else if (last2->right) {
+					owner->top_left = last2->right;
+				}
+				else {
+					owner->top_left = nullptr;
+				}
+			}
+
+			delete last2;
+			owner->current_count--;
 		}
 
-		 Neuron* last2 = current;
+		
+		if (up) {
+			Neuron* current = up;
+			Neuron* inward = up->up;
 
-		if (last2->left) last2->left->right = last2->right;
-		if (last2->right) last2->right->left = last2->left;
-		if (last2->up) last2->up->down = last2->down;
-		if (last2->down) last2->down->up = last2->up;
+			while (inward != nullptr) {
+				current->id = inward->id;
+				current->weight = inward->weight;
+				current = inward;
+				inward = inward->up;
+			}
 
-		if (last2 == owner->top_left) {
-			if (last2->right) {
-				owner->top_left = last2->right;
+			Neuron* last3 = current;
+
+			if (last3->left) last3->left->right = last3->right;
+			if (last3->right) last3->right->left = last3->left;
+			if (last3->up) last3->up->down = last3->down;
+			if (last3->down) last3->down->up = last3->up;
+
+			if (last3 == owner->top_left) {
+				if (last3->down) {
+					Neuron* promoted = last3->down;
+					promoted->up = nullptr;
+					promoted->left = last3->left;
+					promoted->right = last3->right;
+					if (last3->right) last3->right->left = promoted;
+					owner->top_left = promoted;
+				}
+				else if (last3->right) {
+					owner->top_left = last3->right;
+				}
+				else {
+					owner->top_left = nullptr;
+				}
 			}
-			else if (last2->down) {
-				Neuron* newTop = last2->down;
-				while (newTop->left) newTop = newTop->left;
-				owner->top_left = newTop;
-			}
-			else {
-				owner->top_left = nullptr;
-			}
+
+			delete last3;
+			owner->current_count--;
 		}
 
+		
+		if (down) {
+			Neuron* current = down;
+			Neuron* inward = down->down;
 
-		 current = up;
+			while (inward != nullptr) {
+				current->id = inward->id;
+				current->weight = inward->weight;
+				current = inward;
+				inward = inward->down; 
+			}
 
-		 inward = up->up;
+			Neuron* last4 = current;
 
-		while (inward != nullptr && current) {
-			current->id = inward->id;
-			current->weight = inward->weight;
-			current = inward;
-			inward = inward->up;
+			if (last4->left) last4->left->right = last4->right;
+			if (last4->right) last4->right->left = last4->left;
+			if (last4->up) last4->up->down = last4->down;
+			if (last4->down) last4->down->up = last4->up;
+
+			if (last4 == owner->top_left) {
+				if (last4->down) {
+					Neuron* promoted = last4->down;
+					promoted->up = nullptr;
+					promoted->left = last4->left;
+					promoted->right = last4->right;
+					if (last4->right) last4->right->left = promoted;
+					owner->top_left = promoted;
+				}
+				else if (last4->right) {
+					owner->top_left = last4->right;
+				}
+				else {
+					owner->top_left = nullptr;
+				}
+			}
+
+			delete last4;
+			owner->current_count--;
 		}
-
-		Neuron* last3 = current;
-
-		if (last3->left) last3->left->right = last3->right;
-		if (last3->right) last3->right->left = last3->left;
-		if (last3->up) last3->up->down = last3->down;
-		if (last3->down) last3->down->up = last3->up;
-
-		if (last3 == owner->top_left) {
-			if (last3->right) {
-				owner->top_left = last3->right;
-			}
-			else if (last3->down) {
-				Neuron* newTop = last3->down;
-				while (newTop->left) newTop = newTop->left;
-				owner->top_left = newTop;
-			}
-			else {
-				owner->top_left = nullptr;
-			}
-		}
-
-
-
-		 current = down;
-
-		 inward = down->down;
-
-		while (inward != nullptr && current) {
-			current->id = inward->id;
-			current->weight = inward->weight;
-			current = inward;
-			inward = inward->left;
-		}
-
-		Neuron* last4 = current;
-
-		if (last4->left) last4->left->right = last4->right;
-		if (last4->right) last4->right->left = last4->left;
-		if (last4->up) last4->up->down = last4->down;
-		if (last4->down) last4->down->up = last4->up;
-
-		if (last4 == owner->top_left) {
-			if (last4->right) {
-				owner->top_left = last4->right;
-			}
-			else if (last4->down) {
-				Neuron* newTop = last4->down;
-				while (newTop->left) newTop = newTop->left;
-				owner->top_left = newTop;
-			}
-			else {
-				owner->top_left = nullptr;
-			}
-		}
-
-
-		delete last;
-		delete last2;
-		delete last3;
-		delete last4;
-		owner->current_count -= 4;
 
 		rebuildLayerForwardSynapses(owner);
 		if (owner->prev) rebuildLayerForwardSynapses(owner->prev);
 
-		orderColumns(head_layer);
+		n->weight = n->weight / 2.0; // FIXED: was completely missing
 
+		orderColumns(head_layer);
 	}
 
-	Neuron* mergeNeurons(Synapse* s);
+	Neuron* mergeNeurons(Synapse* s) {
+		// for merginging the neurons
+
+		if (!s) return nullptr;
+
+
+		// checking the owner of the seynapse
+		Neuron* sourceNeuron = nullptr;
+		Layer* sourceLayer = nullptr;
+
+		for (Layer* l = head_layer; l != nullptr && !sourceNeuron; l = l->next) {
+
+			for (Neuron* colt = l->top_left; colt != nullptr && !sourceNeuron; colt = colt->right) {
+				for (Neuron* nn = colt; nn != nullptr; nn = nn->down) {
+					bool found = false;
+					for(Synapse* sy = nn->head_axon; sy != nullptr ; sy = sy->next_synapse) 
+						if (sy == s) { found = true; break; }
+					if (found) { sourceNeuron = nn; sourceLayer = l; break; }
+				}
+			}
+
+		}
+
+		if (!sourceNeuron || !sourceLayer) return nullptr;
+
+		Neuron* targetNeuron = s->target_neuron;
+		Layer* outerLayer = sourceLayer->next;
+
+		sourceNeuron->weight = floor((sourceNeuron->weight + targetNeuron->weight) / 2.0);
+		Synapse* travelingAxons = targetNeuron->head_axon;
+		targetNeuron->head_axon = nullptr;
+
+		Neuron* vacUp = targetNeuron->up;
+		Neuron* vacDown = targetNeuron->down;
+		Neuron* vacLeft = targetNeuron->left;
+		Neuron* vacRight = targetNeuron->right;
+		Layer* vacLayer = outerLayer;
+
+		delete targetNeuron;
+		outerLayer->current_count--;
+
+		// Vacancy promoption part
+
+		while (true) {
+			Layer* nextOuterLayer = vacLayer->next;
+			Synapse* best = nextOuterLayer ? findBestCandidate(travelingAxons) : nullptr;
+		}
+	}
 
 
 
@@ -821,11 +889,16 @@ private:
 			bottom->down = n;
 			n->up = bottom;
 
-			Neuron* leftNeighbor = silentNeuronReturnByPosition(l->layerId, row, col - 1);
-			if (leftNeighbor) {
-				n->left = leftNeighbor;
-				leftNeighbor->right = n;
+			if (col > 0) {
+				Neuron* leftNeighbor = silentNeuronReturnByPosition(l->layerId, row, col - 1);
+				if (leftNeighbor) {
+					n->left = leftNeighbor;
+					leftNeighbor->right = n;
+				}
+
 			}
+
+
 			Neuron* rightNeighbor = silentNeuronReturnByPosition(l->layerId, row, col + 1);
 			if (rightNeighbor) {
 				n->right = rightNeighbor; 

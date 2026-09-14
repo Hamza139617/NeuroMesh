@@ -15,6 +15,7 @@ int main() {
 	
 	Neuron* n = m.findNeuronById(7);
 	cout << endl;
+	n->weight = 20000.2;
 	m.pruneNeuron(n);
 	m.printLayer(2);
 
