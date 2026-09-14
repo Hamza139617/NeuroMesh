@@ -842,7 +842,16 @@ private:
 	}
 
 
-	
+	Synapse* findBestCandidate(Synapse* axonList) {
+		Synapse* best = nullptr;
+		
+		for (Synapse* s = axonList; s != nullptr; s = s->next_synapse) {
+			if (best == nullptr) { best = s; continue; }
+			if (s->weight > best->weight) { best = s; continue; }
+			if (s->weight == best->weight && dirPriority(s->direction) < dirPriority(best->direction)) best = s;
+		}
+		return best;
+	}
 
 
 	void placeIntoVacancy(Neuron* moving, Neuron* vacUp, Neuron* vacDown, Neuron* vacLeft, Neuron* vacRight, Layer* vacLayer) {
