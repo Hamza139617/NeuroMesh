@@ -571,6 +571,29 @@ public:
 		}
 	}
 
+	void rowLinkage(Layer* l) {
+		int maxHeight = 0;
+		for (Neuron* c = l->top_left; c; c = c->right) {
+			int h = 0;
+			for (Neuron* n = c; n; n = n->down)  h++;
+			if (h > maxHeight) maxHeight = h;
+		}
+
+		for (int row = 0; row < maxHeight; row++) {
+			Neuron* prev = nullptr;
+			for (Neuron* c = l->top_left; c; c = c->right) {
+				Neuron* n = c;
+				for (int r = 0; r < row && n; r++) n = n->down;
+				if (n) {
+					n->left = prev;
+					if (prev) prev->right = n;
+					prev = n;
+				}
+			}
+			if (prev) prev->right = nullptr;
+		}
+
+	}
 
 	Layer* mergeLayers(Layer* a, Layer* b) {
 		// merging the two layers 
@@ -581,35 +604,78 @@ public:
 
 		Neuron* temp;
 
-		for (Neuron* colt1 = a->top_left, *colt2 = b->top_left; colt1 && colt2; colt1 = colt1->right, colt2 = colt2->right) {
+		Neuron* temp;
+		Neuron* colt1 = a->top_left;
+		Neuron* colt2 = b->top_left;
+		Neuron* prevColumnTopInA = nullptr;
 
-			for (Neuron* s1 = colt1, *s2 = colt2; s1 && s2; s1 = s1->down) {
+		while (colt1 != nullptr || colt2 != nullptr) {
+			Neuron* s1 = colt1;
+			Neuron* s2 = colt2;
+			Neuron* aboveIna = nullptr;
+			Neuron* thisColumnTopInA = colt1;
 
-				s1->weight = floor((s1->weight + s2->weight) / 2);
-				
-				clearAxons(s2);// only clear the axons of s2 because they are going to be deleted and no need 
-				// for creting new connectings of this layer
-				temp = s2;
-				s2 = s2->down;
-				delete temp;
-				temp = nullptr;
-				if(b->current_count > 0)
-				b->current_count--;
+			while (s1 != nullptr || s2 != nullptr) {
+
+				if (s1 != nullptr && s2 != nullptr) {
+					s1->weight = floor((s1->weight + s2->weight) / 2);
+
+					clearAxons(s2);
+					temp = s2;
+					s2 = s2->down;
+					delete temp;
+					temp = nullptr;
+					if (b->current_count > 0)
+						b->current_count--;
+					aboveIna = s1;
+					s1 = s1->down;
+				}
+				else if (s1 != nullptr) {
+					aboveIna = s1;
+					s1 = s1->down;
+				}
+				else {
+					Neuron* migrating = s2;
+					s2 = s2->down;
+
+					migrating->up = aboveIna;
+					migrating->down = nullptr;
+					if (aboveIna) aboveIna->down = migrating;
+					else thisColumnTopInA = migrating;
+
+					aboveIna = migrating;
+					if (b->current_count > 0) b->current_count--;
+					a->current_count;
+				}
 
 			}
 
+			if (colt1 == nullptr && thisColumnTopInA != nullptr) {
+				if (prevColumnTopInA) prevColumnTopInA->right = thisColumnTopInA;
+				else a->top_left = thisColumnTopInA;
+			}
+
+			prevColumnTopInA = thisColumnTopInA;
+			colt1 = colt1 ? colt1->right : nullptr;
+			colt2 = colt2 ? colt2->right : nullptr;
 
 		}
 
+		rowLinkage(a);
+		
 		a->next = b->next;
+
 		if (b->next)
 			b->next->prev = a;
 
-		delete b;
-		b = nullptr ;
+		if (b == tail_layer) tail_layer = a;
 
-		if (a)
-			rebuildLayerForwardSynapses(a);
+		delete b;
+		b = nullptr;
+
+		rebuildLayerForwardSynapses(a);
+
+		if (a->prev) rebuildLayerForwardSynapses(a->prev);
 
 		return a;
 	}
