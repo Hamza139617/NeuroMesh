@@ -571,7 +571,45 @@ public:
 
 
 	Layer* mergeLayers(Layer* a, Layer* b) {
+		// merging the two layers 
+		// a will always be first one and b is always going to be second one
 
+		if (a == nullptr || b == nullptr)
+			return;
+
+		Neuron* temp;
+
+		for (Neuron* colt1 = a->top_left, *colt2 = b->top_left; colt1 && colt2; colt1 = colt1->right, colt2 = colt2->right) {
+
+			for (Neuron* s1 = colt1, *s2 = colt2; s1 && s2; s1 = s1->down) {
+
+				s1->weight = floor((s1->weight + s2->weight) / 2);
+				
+				clearAxons(s2);// only clear the axons of s2 because they are going to be deleted and no need 
+				// for creting new connectings of this layer
+				temp = s2;
+				s2 = s2->down;
+				delete temp;
+				temp = nullptr;
+				if(b->current_count > 0)
+				b->current_count--;
+
+			}
+
+
+		}
+
+		a->next = b->next;
+		if (b->next)
+			b->next->prev = a;
+
+		delete b;
+		b = nullptr ;
+
+		if (a)
+			rebuildLayerForwardSynapses(a);
+
+		return a;
 	}
 
 
