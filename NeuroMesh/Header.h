@@ -570,7 +570,11 @@ public:
 	}
 
 
-	Layer* mergeLayers(Layer* a, Layer* b);
+	Layer* mergeLayers(Layer* a, Layer* b) {
+
+	}
+
+
 	void removeEmptyLayer(Layer* l) {
 		if (!l) return;
 
