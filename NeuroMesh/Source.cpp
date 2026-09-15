@@ -7,17 +7,9 @@ int main() {
 
 	m.loadFromFile("mesh.txt");
 
-	m.printLayer(2);
+	RaylibGUI gui(m);
+	gui.run();
 
-
-
-
-	
-	Neuron* n = m.findNeuronById(7);
-	cout << endl;
-	n->weight = 20000.2;
-	m.pruneNeuron(n);
-	m.printLayer(2);
 
 	
 
