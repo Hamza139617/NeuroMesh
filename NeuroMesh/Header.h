@@ -86,6 +86,8 @@ public:
 		cout << " row " << spot.row << " col " << spot.col << endl;
 
 		orderColumns(head_layer);
+
+		checkStatus();
 	}
 
 
@@ -175,6 +177,8 @@ public:
 
 
 		orderColumns(head_layer);
+		checkStatus();
+
 	}
 
 	void deleteLayer(int layerId) {
@@ -186,7 +190,7 @@ public:
 				return;
 			}
 		}
-
+		checkStatus();
 		return;
 	}
 
@@ -380,6 +384,7 @@ public:
 		n->weight = n->weight / 2.0; // FIXED: was completely missing
 
 		orderColumns(head_layer);
+		checkStatus();
 	}
 
 	Neuron* mergeNeurons(Synapse* s) {
@@ -464,6 +469,8 @@ public:
 		}
 
 		for (Layer* l = head_layer; l != nullptr; l = l->next) rebuildLayerForwardSynapses(l);
+
+		checkStatus();
 
 		return sourceNeuron;
 	}
@@ -677,6 +684,10 @@ public:
 
 		if (a->prev) rebuildLayerForwardSynapses(a->prev);
 
+		checkStatus();
+
+		
+
 		return a;
 	}
 
@@ -706,29 +717,51 @@ public:
 		// for printing the layer 
 		// this is als going to be helping us in the debugging part as well
 
-		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+		//for (Layer* l = head_layer; l != nullptr; l = l->next) {
 
-			Neuron* n;
+		//	Neuron* n;
 
-			n = l->top_left;
+		//	n = l->top_left;
 
-			cout << "Layer : " << l->layerId << endl;
+		//	cout << "Layer : " << l->layerId << endl;
 
-			while (n != nullptr) {
+		//	while (n != nullptr) {
 
-				Neuron* st = n;
+		//		Neuron* st = n;
 
-				for (; n->right != nullptr; n = n->right) {
-					cout << n->id << " ";
+		//		for (; n->right != nullptr; n = n->right) {
+		//			cout << n->id << " ";
+		//		}
+
+		//		cout << n->id << endl;
+
+		//		n = st->down;
+			//}
+
+
+		//}
+
+
+		Layer* l = getLayerById(layerid);
+
+		if (l == nullptr) return;
+
+		for (int row = 0; row < N; row++) {
+			for (int col = 0; col < N; col++) {
+				Neuron* n = silentNeuronReturnByPosition(layerid, row, col);
+
+				if (n) {
+					cout << "  ID: " << n->id << " W: " << n->weight;
+
 				}
-
-				cout << n->id << endl;
-
-				n = st->down;
+				else {
+					cout << " empty ";
+				}
 			}
-
-
+			cout << endl;
 		}
+
+
 
 	}
 	void exportMesh(const std::string& fileName) {
@@ -939,6 +972,8 @@ public:
 	char forwardPropagate(char inputLetter) {
 		// doing the forward propogation thing
 
+		if (head_layer == nullptr || head_layer->top_left == nullptr) return '0';
+
 		char ch = inputLetter;
 		int chn = toupper(inputLetter) - 'A';
 		Synapse* max = nullptr;
@@ -953,6 +988,7 @@ public:
 		for (Neuron* nod = head_layer->top_left; nod; ) {
 
 			max = nod->head_axon;
+			if (nod->head_axon == nullptr) break;
 			maxWeight = nod->head_axon->weight;
 			maxDir = nod->head_axon->direction;
 
@@ -996,13 +1032,51 @@ public:
 		}
 
 		char result = chn + 'A';
-
+		
 		return result;
 
 
 	}
 
-	void backwardPropagate(char targetLetter);
+	void backwardPropagate(char targetLetter, char gen) {
+
+		// first finding the maxSynapse 
+
+
+
+		if (head_layer == nullptr || head_layer->top_left == nullptr) return;
+		
+		char genL = gen;
+		if (genL == targetLetter) return;
+		int genl = toupper(genL) - 'A';
+		int gent = toupper(targetLetter) - 'A';
+
+		double error = gent - genl;
+
+		
+
+		Synapse* maxSynapse = head_layer->top_left->head_axon;
+
+		for (Neuron* nod = head_layer->top_left; nod; ) {
+			for (Synapse* s = nod->head_axon; s; s = s->next_synapse) {
+				if (s->is_active == true) {
+					nod = s->target_neuron;
+					s->weight += error;
+					
+					break;
+				}
+			}
+			break;
+		}
+
+
+
+		
+
+
+
+
+	}
 
 private:
 
@@ -1303,6 +1377,104 @@ private:
 		return c;
 	}
 
+	double layerWeight(Layer* l) {
+		if (!l) return 0.0;
+
+		double total = 0.0;
+
+		for (Neuron* col = l->top_left; col != nullptr; col = col->right) {
+			for (Neuron* n = col; n; n = n->down) {
+				total += n->weight;
+			}
+		}
+
+		return total;
+	}
+
+	void checkStatus() {
+		if (!head_layer || head_layer->top_left) return;
+
+		while (true) {
+			bool changed = false;
+
+			for (Layer* l = head_layer; l && !changed; l = l->next) {
+
+				for (Neuron* col = l->top_left; col != nullptr && !changed; col = col->right) {
+					for (Neuron* n = col; n != nullptr; n = n->down) {
+
+						if (n->weight > pthreshold) {
+
+							pruneNeuron(n);
+							changed = true;
+							break;
+
+						}
+
+					}
+
+
+				}
+
+			}
+
+			if (changed) continue;
+
+
+			for (Layer* l = head_layer; l && !changed; l = l->next) {
+
+				for (Neuron* col = l->top_left; col != nullptr && !changed; col = col->right) {
+					for (Neuron* n = col; n != nullptr; n = n->down) {
+
+						for (Synapse* s = n->head_axon; s; s = s->next_synapse) {
+							if (s->weight > fthreshold) {
+								mergeNeurons(s);
+								changed = true;
+								break;
+							}
+						}
+
+					}
+
+
+				}
+
+			}
+
+			if (changed) continue;
+
+			for (Layer* l = head_layer; l && l->next != nullptr; l = l->next) {
+				Layer* nex = l->next;
+
+				if (layerWeight(l) == layerWeight(nex)) {
+					mergeLayers(l, nex);
+					changed = true;
+					break;
+				}
+			}
+
+			if (changed) continue;
+
+
+			for (Layer* l = head_layer; l && l->next != nullptr; l = l->next) {
+				Layer* nex = l->next;
+
+				
+				if (l->current_count == 0) {
+					removeEmptyLayer(l);
+					changed = true;
+					break;
+				}
+
+
+			}
+
+			if (!changed) break;
+
+		}
+
+
+
+	}
 
 	void clearAxons(Neuron* n) {
 		if (!n) return;
@@ -1593,6 +1765,17 @@ private:
 			cin >> id;
 			Neuron* n = mesh.silentNeuronReturnById(id);
 			mesh.mergeNeurons(n->head_axon);
+		}
+		else if (IsKeyPressed(KEY_H)) {
+			char input, expected;
+			char result;
+			cin >> input;
+			cin >> expected;
+			 result = mesh.forwardPropagate(input);
+			 cout << result;
+			cout << endl;
+			mesh.backwardPropagate(expected, result);
+			
 		}
 		else if (IsKeyPressed(KEY_SEVEN)) {
 			running = false;
