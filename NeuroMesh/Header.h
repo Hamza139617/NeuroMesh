@@ -943,17 +943,61 @@ public:
 		int chn = toupper(inputLetter) - 'A';
 		Synapse* max = nullptr;
 		double maxWeight = 0;
+		char maxDir;
+		max = head_layer->top_left->head_axon;
+		maxWeight = head_layer->top_left->head_axon->weight;
+		
 
 		
 
 		for (Neuron* nod = head_layer->top_left; nod; ) {
+
 			max = nod->head_axon;
 			maxWeight = nod->head_axon->weight;
-			for(Synapse* s = nod->head_axon ; )
+			maxDir = nod->head_axon->direction;
+
+			for (Synapse* s = nod->head_axon; s; s = s->next_synapse) {
+				if (s->weight > maxWeight) {
+					maxWeight = s->weight;
+					max = s;
+					maxDir = s->direction;
+				}
+				else if (s->weight == maxWeight) {
+					int score1 = 0; // score for the weight of the old
+					int score2 = 0; // score for the wieght of the nex
+
+					if (s->direction == 'L') score1 = 4;
+					else if (s->direction == 'R') score1 = 3;
+					else if (s->direction == 'U') score1 = 2;
+					else score1 = 1;
+
+					if (maxDir == 'L') score2 = 4;
+					else if (maxDir == 'R') score2 = 3;
+					else if (maxDir == 'U') score2 = 2;
+					else score2 = 1;
+
+					if (score1 > score2) {
+						maxWeight = s->weight;
+						max = s;
+						maxDir = s->direction;
+					}
+
+
+				}
+			}
+
+			max->is_active = true;
+
+			chn = ((chn + (int)fmod(max->weight, 26.0)) % 26 + 26) % 26;
+
+
+			nod = max->target_neuron;
 			
 		}
 
-		return 'p';
+		char result = chn + 'A';
+
+		return result;
 
 
 	}
