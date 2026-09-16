@@ -604,7 +604,7 @@ public:
 
 		Neuron* temp;
 
-		Neuron* temp;
+
 		Neuron* colt1 = a->top_left;
 		Neuron* colt2 = b->top_left;
 		Neuron* prevColumnTopInA = nullptr;
@@ -936,7 +936,27 @@ public:
 
 
 	//!!!!!!!!!!!!!!!!!prapogation!!!!!!!!!!!!!!!!!
-	char forwardPropagate(char inputLetter);
+	char forwardPropagate(char inputLetter) {
+		// doing the forward propogation thing
+
+		char ch = inputLetter;
+		int chn = toupper(inputLetter) - 'A';
+		Synapse* max = nullptr;
+		double maxWeight = 0;
+
+		
+
+		for (Neuron* nod = head_layer->top_left; nod; ) {
+			max = nod->head_axon;
+			maxWeight = nod->head_axon->weight;
+			for(Synapse* s = nod->head_axon ; )
+			
+		}
+
+		return 'p';
+
+
+	}
 
 	void backwardPropagate(char targetLetter);
 
