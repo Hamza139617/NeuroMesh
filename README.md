@@ -250,21 +250,7 @@ This project provided hands-on experience with:
 * Weighted connectivity
 * Interactive visualization
 * Designing a neural substrate from scratch
-
-## Future Improvements
-
-Potential future improvements include:
-
-* [ ] Add automated tests for substrate operations
-* [ ] Improve error handling for malformed input files
-* [ ] Add richer synapse visualization
-* [ ] Add interactive substrate controls
-* [ ] Add configurable substrate generation
-* [ ] Add performance benchmarks
-* [ ] Improve memory-management safety using modern C++ practices
-* [ ] Split the implementation into separate `.h` and `.cpp` files
-* [ ] Add screenshots and demonstrations
-* [ ] Explore learning and adaptive mechanisms on top of the substrate
+* Data Structures and Algorithms
 
 ## Author
 
