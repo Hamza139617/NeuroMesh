@@ -218,7 +218,7 @@ public:
 		if (up) clearAxons(up);
 		if (down) clearAxons(down);
 
-		
+
 		if (left) {
 			Neuron* current = left;
 			Neuron* inward = left->left;
@@ -258,7 +258,7 @@ public:
 			owner->current_count--;
 		}
 
-		
+
 		if (right) {
 			Neuron* current = right;
 			Neuron* inward = right->right;
@@ -298,7 +298,7 @@ public:
 			owner->current_count--;
 		}
 
-		
+
 		if (up) {
 			Neuron* current = up;
 			Neuron* inward = up->up;
@@ -338,7 +338,7 @@ public:
 			owner->current_count--;
 		}
 
-		
+
 		if (down) {
 			Neuron* current = down;
 			Neuron* inward = down->down;
@@ -347,7 +347,7 @@ public:
 				current->id = inward->id;
 				current->weight = inward->weight;
 				current = inward;
-				inward = inward->down; 
+				inward = inward->down;
 			}
 
 			Neuron* last4 = current;
@@ -402,7 +402,7 @@ public:
 			for (Neuron* colt = l->top_left; colt != nullptr && !sourceNeuron; colt = colt->right) {
 				for (Neuron* nn = colt; nn != nullptr; nn = nn->down) {
 					bool found = false;
-					for(Synapse* sy = nn->head_axon; sy != nullptr ; sy = sy->next_synapse) 
+					for (Synapse* sy = nn->head_axon; sy != nullptr; sy = sy->next_synapse)
 						if (sy == s) { found = true; break; }
 					if (found) { sourceNeuron = nn; sourceLayer = l; break; }
 				}
@@ -547,7 +547,7 @@ public:
 
 			if (leftB) leftB = leftB->down;
 			if (rightB) rightB = rightB->down;
-			
+
 			row++;
 		}
 
@@ -669,7 +669,7 @@ public:
 		}
 
 		rowLinkage(a);
-		
+
 		a->next = b->next;
 
 		if (b->next)
@@ -686,7 +686,7 @@ public:
 
 		checkStatus();
 
-		
+
 
 		return a;
 	}
@@ -707,7 +707,7 @@ public:
 		}
 
 		deleteLayer(l->layerId);
-		
+
 	}
 
 
@@ -841,7 +841,7 @@ public:
 				}
 				row = 0;
 			}
-			
+
 		}
 
 		return nullptr;
@@ -876,15 +876,15 @@ public:
 				Neuron* colt = l->top_left;
 				for (int c = 0; c < col && colt; c++)
 					colt = colt->right;
-			
+
 				if (!colt) return nullptr;
 
 				Neuron* n = colt;
 				for (int r = 0; r < row && n; r++)
 					n = n->down;
 
-				if (!n) 
-				return nullptr;
+				if (!n)
+					return nullptr;
 
 				cout << "Neuron id : " << n->id << " Weight: " << n->weight;
 				return n;
@@ -952,7 +952,7 @@ public:
 				col++;
 				for (Neuron* n = colt; n; n = n->down) {
 					if (n->id == id) {
-						
+
 						return n;
 					}
 
@@ -981,9 +981,9 @@ public:
 		char maxDir;
 		max = head_layer->top_left->head_axon;
 		maxWeight = head_layer->top_left->head_axon->weight;
-		
 
-		
+
+
 
 		for (Neuron* nod = head_layer->top_left; nod; ) {
 
@@ -1028,11 +1028,11 @@ public:
 
 
 			nod = max->target_neuron;
-			
+
 		}
 
 		char result = chn + 'A';
-		
+
 		return result;
 
 
@@ -1045,7 +1045,7 @@ public:
 
 
 		if (head_layer == nullptr || head_layer->top_left == nullptr) return;
-		
+
 		char genL = gen;
 		if (genL == targetLetter) return;
 		int genl = toupper(genL) - 'A';
@@ -1053,7 +1053,7 @@ public:
 
 		double error = gent - genl;
 
-		
+
 
 		Synapse* maxSynapse = head_layer->top_left->head_axon;
 
@@ -1062,7 +1062,7 @@ public:
 				if (s->is_active == true) {
 					nod = s->target_neuron;
 					s->weight += error;
-					
+
 					break;
 				}
 			}
@@ -1071,7 +1071,7 @@ public:
 
 
 
-		
+
 
 
 
@@ -1092,7 +1092,7 @@ private:
 
 	Synapse* findBestCandidate(Synapse* axonList) {
 		Synapse* best = nullptr;
-		
+
 		for (Synapse* s = axonList; s != nullptr; s = s->next_synapse) {
 			if (best == nullptr) { best = s; continue; }
 			if (s->weight > best->weight) { best = s; continue; }
@@ -1112,7 +1112,7 @@ private:
 		if (vacLeft) vacLeft->right = moving;
 		if (vacRight) vacRight->left = moving;
 		if (vacUp == nullptr && vacLeft == nullptr) vacLayer->top_left = moving;
- 	}
+	}
 
 	void bypassVacantSlot(Layer* layer, Neuron* up, Neuron* down, Neuron* left, Neuron* right) {
 		if (up != nullptr) {
@@ -1140,7 +1140,7 @@ private:
 	}
 
 
-	void findNeuronPos(Layer* l,int& row, int& col , Neuron* n) {
+	void findNeuronPos(Layer* l, int& row, int& col, Neuron* n) {
 		if (!l) return;
 
 		row = 0;
@@ -1169,7 +1169,7 @@ private:
 		}
 	}
 
-	
+
 	PlacementSpot findPlacementSpot() {
 		Layer* target = nullptr;
 
@@ -1243,12 +1243,12 @@ private:
 
 			Neuron* rightNeighbor = silentNeuronReturnByPosition(l->layerId, row, col + 1);
 			if (rightNeighbor) {
-				n->right = rightNeighbor; 
+				n->right = rightNeighbor;
 				rightNeighbor->left = n;
 			}
 
-			
-		} 
+
+		}
 
 		l->current_count++;
 		return n;
@@ -1366,7 +1366,7 @@ private:
 	int columnHeight(Layer* l, int col) {
 		int h = 0;
 		for (Neuron* n = columnTop(l, col); n != nullptr; n = n->down) h++;
-		
+
 		return h;
 	}
 
@@ -1458,7 +1458,7 @@ private:
 			for (Layer* l = head_layer; l && l->next != nullptr; l = l->next) {
 				Layer* nex = l->next;
 
-				
+
 				if (l->current_count == 0) {
 					removeEmptyLayer(l);
 					changed = true;
@@ -1489,7 +1489,7 @@ private:
 		n->head_axon = nullptr;
 	}
 
-	
+
 	void orderColumns(Layer* head_layer) {
 		// basically for ordering the columns
 
@@ -1518,7 +1518,7 @@ private:
 
 					if (weight1 > weight2) {
 						// checking fi the total weight of one column is more than the total weight of the other column
-						   
+
 						Neuron* firstN = n;
 						secondN = n->right;
 						row = 0;
@@ -1527,7 +1527,7 @@ private:
 							Neuron* nowAtCol = secondN;
 							Neuron* nowAtNextCol = firstN;
 
-							
+
 							leftNeighbor = (col > 0) ? silentNeuronReturnByPosition(l->layerId, row, col - 1) : nullptr;
 							rightNeighbor = silentNeuronReturnByPosition(l->layerId, row, col + 2);
 
@@ -1565,25 +1565,25 @@ private:
 
 							aligned1 = nullptr;
 
-							
-								if (nowAtNextCol) {
-									if (l->next) aligned1 = silentNeuronReturnByPosition(l->next->layerId, row, col + 1);
 
-									if (aligned1) {
-										addSynapse(nowAtNextCol, aligned1->up, 'U');
-										addSynapse(nowAtNextCol, aligned1->down, 'D');
-										addSynapse(nowAtNextCol, aligned1->left, 'L');
-										addSynapse(nowAtNextCol, aligned1->right, 'R');
+							if (nowAtNextCol) {
+								if (l->next) aligned1 = silentNeuronReturnByPosition(l->next->layerId, row, col + 1);
 
-									}
+								if (aligned1) {
+									addSynapse(nowAtNextCol, aligned1->up, 'U');
+									addSynapse(nowAtNextCol, aligned1->down, 'D');
+									addSynapse(nowAtNextCol, aligned1->left, 'L');
+									addSynapse(nowAtNextCol, aligned1->right, 'R');
+
 								}
+							}
 
-								if (firstN) firstN = firstN->down;
-								if (secondN) secondN = secondN->down;
-								row++;
-							
+							if (firstN) firstN = firstN->down;
+							if (secondN) secondN = secondN->down;
+							row++;
 
-							
+
+
 						}
 
 						changed = true;
@@ -1602,52 +1602,54 @@ private:
 	}
 
 
-	public:
+public:
 
-		Layer* getLayerById(int layerId) {
-			for (Layer* l = head_layer; l != nullptr; l = l->next) {
-				if (l->layerId == layerId) {
-					return l;
-				}
-
-				
+	Layer* getLayerById(int layerId) {
+		for (Layer* l = head_layer; l != nullptr; l = l->next) {
+			if (l->layerId == layerId) {
+				return l;
 			}
 
-			return nullptr;
-		}
-
-		Layer* getHeadLayer() {
-			return head_layer;
-		}
-
-		int getN() {
-			return N;
-		}
-
-		Layer* getOwnerLayer(Neuron* n) {
-			return ownerLayer(n);
-		}
-
-		Neuron* navigateFrom(int& layerId, int& row, int& col, int choice) {
 
 		}
 
-		
-		double columnWeight(Layer* l, int col) {
-			double sum = 0.0;
-			for (Neuron* n = columnTop(l, col); n != nullptr; n = n->down) {
-				sum += n->weight;
-			}
+		return nullptr;
+	}
 
-			return sum;
+	Layer* getHeadLayer() {
+		return head_layer;
+	}
+
+	int getN() {
+		return N;
+	}
+
+	Layer* getOwnerLayer(Neuron* n) {
+		return ownerLayer(n);
+	}
+
+	Neuron* navigateFrom(int& layerId, int& row, int& col, int choice) {
+
+	}
+
+
+	double columnWeight(Layer* l, int col) {
+		double sum = 0.0;
+		for (Neuron* n = columnTop(l, col); n != nullptr; n = n->down) {
+			sum += n->weight;
 		}
 
+		return sum;
+	}
 
-		
 
-		
+
+
+
 };
 
+
+enum class AppState { Menu, Simulation, Controls, About };
 
 class RaylibGUI {
 private:
@@ -1667,22 +1669,49 @@ private:
 	float spacing;
 	float nodeRadius;
 
+	// ---- app state / navigation ----
+	AppState state;
+	int menuSelection; // 0 = Simulation, 1 = Controls, 2 = About
+
+	// ---- smooth layer transition ----
+	float layerTransition;   // 0 = just switched, 1 = settled
+	int prevLayerId;         // layer we are fading away from
+	int transitionDir;       // +1 = moving to a deeper layer, -1 = back
+	static constexpr float TRANSITION_DURATION = 0.32f;
+
+	// ---- dark blue theme ----
+	const Color BG_DEEP = Color{ 8,   11,  22,  255 };
+	const Color BG_PANEL = Color{ 15,  20,  38,  255 };
+	const Color BG_PANEL_LIGHT = Color{ 22,  29,  52,  255 };
+	const Color BORDER_COL = Color{ 35,  46,  74,  255 };
+	const Color BLUE_DEEP = Color{ 38,  92,  170, 255 };
+	const Color BLUE_PRIMARY = Color{ 64,  156, 255, 255 };
+	const Color BLUE_LIGHT = Color{ 130, 205, 255, 255 };
+	const Color BLUE_DIM = Color{ 60,  95,  150, 120 };
+	const Color BLUE_BRIGHT = Color{ 120, 195, 255, 240 };
+	const Color ACCENT_GOLD = Color{ 255, 196, 92,  255 };
+	const Color TEXT_PRIMARY = Color{ 225, 232, 245, 255 };
+	const Color TEXT_MUTED = Color{ 110, 128, 158, 255 };
+
 public:
-	RaylibGUI(NeuroMesh& mesh): mesh(mesh) {
+	RaylibGUI(NeuroMesh& mesh) : mesh(mesh) {
 		currentLayer = 0;
 		currentRow = 0;
 		currentCol = 0;
 
 		running = true;
 
-		screenWidth = 1200;
-		screenHeight = 700;
+		screenWidth = 1280;
+		screenHeight = 760;
 
-		gridStartX = 500.0f;
-		gridStartY = 160.0f;
+		state = AppState::Menu;
+		menuSelection = 0;
 
-		spacing = 100.0f;
-		nodeRadius = 18.0f;
+		layerTransition = 1.0f;
+		prevLayerId = 0;
+		transitionDir = 1;
+
+		computeLayout();
 	}
 
 	void run() {
@@ -1694,9 +1723,16 @@ public:
 		while (!WindowShouldClose() && running) {
 			handleInput();
 
+			if (state == AppState::Simulation) validateSelection();
+
+			if (layerTransition < 1.0f) {
+				layerTransition += GetFrameTime() / TRANSITION_DURATION;
+				if (layerTransition > 1.0f) layerTransition = 1.0f;
+			}
+
 			BeginDrawing();
 
-			ClearBackground(BLACK);
+			ClearBackground(BG_DEEP);
 
 			draw();
 
@@ -1709,13 +1745,64 @@ public:
 private:
 
 	void initialize() {
-
 		InitWindow(screenWidth, screenHeight, "NeuroMesh");
+		SetExitKey(KEY_NULL); // otherwise Esc would close the whole window
+
+		// Fit the window to the ACTUAL monitor, with room left over for the
+		// title bar and taskbar - a fixed 1280x760 can end up with its
+		// title bar pushed off-screen on a 1366x768 display (8px of slack
+		// isn't enough), which looks exactly like "the window never opened"
+		// even though the process is running fine.
+		int monitor = GetCurrentMonitor();
+		int monitorW = GetMonitorWidth(monitor);
+		int monitorH = GetMonitorHeight(monitor);
+
+		int margin = 110; // title bar + taskbar + a little breathing room
+		int maxW = monitorW - 60;
+		int maxH = monitorH - margin;
+
+		if (screenWidth > maxW) screenWidth = maxW;
+		if (screenHeight > maxH) screenHeight = maxH;
+
+		SetWindowSize(screenWidth, screenHeight);
+		SetWindowPosition((monitorW - screenWidth) / 2, (monitorH - screenHeight) / 2 - 20);
+
+		computeLayout(); // redo the grid math against the final window size
 
 		SetTargetFPS(60);
-		
 	}
+
+	// Sizes the grid so the main layer and the next-layer preview both fit
+	// on screen, whatever N is and whatever the window ended up sized to.
+	void computeLayout() {
+		int n = mesh.getN();
+		if (n < 2) n = 2;
+
+		float available = (float)screenWidth - 600.0f; // room right of the info panel
+		if (available < 200.0f) available = 200.0f;
+		float gap = 130.0f;       // space between main grid and preview
+		float maxSpacing = (available - gap) / ((n - 1) * 1.6f);
+
+		spacing = maxSpacing < 90.0f ? maxSpacing : 90.0f;
+		if (spacing < 40.0f) spacing = 40.0f;
+		nodeRadius = spacing * 0.18f;
+
+		gridStartX = 500.0f;
+		gridStartY = 210.0f;
+	}
+
+	// ---------------------------------------------------------------- input --
 	void handleInput() {
+		if (state == AppState::Menu) { handleMenuInput(); return; }
+
+		if (state == AppState::Controls || state == AppState::About) {
+			if (IsKeyPressed(KEY_ESCAPE)) state = AppState::Menu;
+			return;
+		}
+
+		// ---- Simulation ----
+		if (IsKeyPressed(KEY_ESCAPE)) { state = AppState::Menu; return; }
+
 		if (IsKeyPressed(KEY_ONE)) {
 			moveUp();
 		}
@@ -1735,7 +1822,6 @@ private:
 			nextLayer();
 		}
 		else if (IsKeyPressed(KEY_A)) {
-			//cout << "running";
 			int id;
 			double weight;
 
@@ -1764,254 +1850,589 @@ private:
 			int id;
 			cin >> id;
 			Neuron* n = mesh.silentNeuronReturnById(id);
-			mesh.mergeNeurons(n->head_axon);
+			if (n != nullptr) mesh.mergeNeurons(n->head_axon);
 		}
 		else if (IsKeyPressed(KEY_H)) {
 			char input, expected;
 			char result;
 			cin >> input;
 			cin >> expected;
-			 result = mesh.forwardPropagate(input);
-			 cout << result;
+			result = mesh.forwardPropagate(input);
+			cout << result;
 			cout << endl;
 			mesh.backwardPropagate(expected, result);
-			
 		}
 		else if (IsKeyPressed(KEY_SEVEN)) {
 			running = false;
 		}
-
-
-
-
 	}
+
+	void handleMenuInput() {
+		if (IsKeyPressed(KEY_DOWN)) {
+			menuSelection = (menuSelection + 1) % 3;
+		}
+		else if (IsKeyPressed(KEY_UP)) {
+			menuSelection = (menuSelection + 2) % 3;
+		}
+		else if (IsKeyPressed(KEY_ENTER)) {
+			if (menuSelection == 0) {
+				state = AppState::Simulation;
+				layerTransition = 1.0f; // entering fresh - no animation
+			}
+			else if (menuSelection == 1) state = AppState::Controls;
+			else state = AppState::About;
+		}
+		else if (IsKeyPressed(KEY_ESCAPE)) {
+			running = false; // Esc on the main menu quits
+		}
+	}
+
+	// -------------------------------------------------------------- drawing --
 	void draw() {
-		drawTitle();
+		if (state == AppState::Menu) { drawMenu(); return; }
+		if (state == AppState::Controls) { drawControlsScreen(); return; }
+		if (state == AppState::About) { drawAboutScreen(); return; }
+
+		drawSimulation();
+	}
+
+	// ---- small helpers ----
+	float easeOutCubic(float t) {
+		float u = 1.0f - t;
+		return 1.0f - u * u * u;
+	}
+
+	Color lerpColor(Color a, Color b, float t) {
+		if (t < 0.0f) t = 0.0f;
+		if (t > 1.0f) t = 1.0f;
+		return Color{
+			(unsigned char)(a.r + (b.r - a.r) * t),
+			(unsigned char)(a.g + (b.g - a.g) * t),
+			(unsigned char)(a.b + (b.b - a.b) * t),
+			(unsigned char)(a.a + (b.a - a.a) * t)
+		};
+	}
+
+	// One S-shaped curve between two points (also used to place the
+	// travelling pulses, so they follow the line exactly).
+	Vector2 curvePoint(Vector2 a, Vector2 b, float t) {
+		float s = t * t * (3.0f - 2.0f * t);
+		return Vector2{ a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * s };
+	}
+
+	void drawCurve(Vector2 a, Vector2 b, float thick, Color c) {
+		const int segments = 20;
+		Vector2 prev = a;
+		for (int i = 1; i <= segments; i++) {
+			Vector2 p = curvePoint(a, b, (float)i / segments);
+			DrawLineEx(prev, p, thick, c);
+			prev = p;
+		}
+	}
+
+	void drawTopBar(const char* right) {
+		DrawRectangle(0, 0, screenWidth, 80, BG_PANEL);
+		DrawRectangle(0, 79, screenWidth, 1, BORDER_COL);
+		DrawText("NeuroMesh", 40, 26, 28, BLUE_PRIMARY);
+
+		if (right != nullptr) {
+			int w = MeasureText(right, 15);
+			DrawText(right, screenWidth - w - 40, 32, 15, TEXT_MUTED);
+		}
+	}
+
+	// slowly drifting constellation behind the main menu
+	void drawBackdropNetwork() {
+		float t = (float)GetTime();
+		const int count = 18;
+		Vector2 pts[count];
+
+		for (int i = 0; i < count; i++) {
+			pts[i].x = (0.5f + 0.48f * sinf(i * 1.7f + t * 0.12f)) * screenWidth;
+			pts[i].y = (0.5f + 0.48f * cosf(i * 2.3f + t * 0.10f)) * screenHeight;
+		}
+
+		for (int i = 0; i < count; i++) {
+			for (int j = i + 1; j < count; j++) {
+				float dx = pts[i].x - pts[j].x;
+				float dy = pts[i].y - pts[j].y;
+				float dist = sqrtf(dx * dx + dy * dy);
+				if (dist < 240.0f) {
+					float a = (1.0f - dist / 240.0f) * 0.35f;
+					DrawLineEx(pts[i], pts[j], 1.0f, Fade(BLUE_PRIMARY, a));
+				}
+			}
+		}
+		for (int i = 0; i < count; i++) {
+			DrawCircleV(pts[i], 3.0f, Fade(BLUE_LIGHT, 0.55f));
+		}
+	}
+
+	// ---- main menu ----
+	void drawMenu() {
+		drawBackdropNetwork();
+
+		const char* title = "NeuroMesh";
+		int titleSize = 64;
+		int tw = MeasureText(title, titleSize);
+		DrawText(title, screenWidth / 2 - tw / 2, 120, titleSize, BLUE_PRIMARY);
+
+		const char* subtitle = "A pointer-based dynamic neural substrate";
+		int subSize = 20;
+		int stw = MeasureText(subtitle, subSize);
+		DrawText(subtitle, screenWidth / 2 - stw / 2, 198, subSize, TEXT_MUTED);
+
+		const char* items[3] = { "Simulation", "Controls", "About" };
+		const char* notes[3] = {
+			"Explore the live mesh, layer by layer",
+			"Every key and what it does",
+			"What this project is and how it works"
+		};
+
+		float cardW = 440.0f, cardH = 84.0f, gap = 18.0f;
+		float startY = 280.0f;
+
+		for (int i = 0; i < 3; i++) {
+			float x = screenWidth / 2 - cardW / 2;
+			float y = startY + i * (cardH + gap);
+			bool sel = (i == menuSelection);
+
+			Rectangle rec = { x, y, cardW, cardH };
+			DrawRectangleRounded(rec, 0.16f, 8, sel ? BG_PANEL_LIGHT : BG_PANEL);
+			DrawRectangleLinesEx(rec, sel ? 2.0f : 1.0f, sel ? ACCENT_GOLD : BORDER_COL);
+
+			if (sel) DrawRectangle((int)x + 2, (int)y + 14, 4, (int)cardH - 28, ACCENT_GOLD);
+
+			DrawText(items[i], (int)x + 32, (int)y + 16, 26, sel ? Color{ 255, 255, 255, 255 } : TEXT_PRIMARY);
+			DrawText(notes[i], (int)x + 32, (int)y + 50, 15, sel ? BLUE_LIGHT : TEXT_MUTED);
+		}
+
+		const char* hint = "Up / Down  navigate      Enter  select      Esc  quit";
+		int hs = 15;
+		int hw = MeasureText(hint, hs);
+		DrawText(hint, screenWidth / 2 - hw / 2, screenHeight - 50, hs, TEXT_MUTED);
+	}
+
+	// ---- controls screen ----
+	void drawControlsScreen() {
+		drawTopBar("Esc  back to menu");
+		DrawText("Controls", 80, 120, 36, TEXT_PRIMARY);
+		DrawRectangle(80, 168, 120, 3, BLUE_PRIMARY);
+
+		struct KeyRow { const char* key; const char* desc; };
+		KeyRow rows[] = {
+			{ "1 / 2 / 3 / 4", "Move selection up / down / left / right" },
+			{ "5 / 6",         "Go to the previous / next layer" },
+			{ "A",             "Insert a neuron  (type id and weight in the console)" },
+			{ "B",             "Delete a neuron  (type its id in the console)" },
+			{ "C",             "Delete a layer  (type its id in the console)" },
+			{ "D",             "Prune a neuron  (type its id in the console)" },
+			{ "T",             "Fuse a neuron's first synapse  (type its id in the console)" },
+			{ "H",             "Forward + backward propagate  (input, expected in the console)" },
+			{ "7",             "Quit" },
+			{ "Esc",           "Back to the menu" },
+		};
+
+		float y = 196.0f;
+		for (auto& row : rows) {
+			Rectangle keyBox = { 80.0f, y, 170.0f, 36.0f };
+			DrawRectangleRounded(keyBox, 0.3f, 6, BG_PANEL);
+			DrawRectangleLinesEx(keyBox, 1.0f, BORDER_COL);
+			int kw = MeasureText(row.key, 17);
+			DrawText(row.key, (int)(80 + 85 - kw / 2), (int)y + 9, 17, BLUE_PRIMARY);
+
+			DrawText(row.desc, 275, (int)y + 9, 18, TEXT_PRIMARY);
+			y += 48.0f;
+		}
+	}
+
+	// ---- about screen ----
+	void drawAboutScreen() {
+		drawTopBar("Esc  back to menu");
+		DrawText("About", 80, 120, 36, TEXT_PRIMARY);
+		DrawRectangle(80, 168, 120, 3, BLUE_PRIMARY);
+
+		const char* lines[] = {
+			"NeuroMesh is a pointer-based data structure project: a dynamically",
+			"growing mesh of layers, each holding an N x N grid of neurons that",
+			"are linked only through up / down / left / right pointers.",
+			"No arrays and no STL containers are used anywhere in the mesh.",
+			"",
+			"Neurons connect forward to the next layer through synapses, following",
+			"a fixed orthogonal rule. The mesh restructures itself at runtime:",
+			"overloaded neurons prune their neighbours, strong synapses fuse",
+			"neurons across layers, and columns or whole layers merge or vanish",
+			"as their weights change - all through direct pointer relinking.",
+			"",
+			"This viewer reads the live structure directly, so what you see is",
+			"the real mesh, not a separate model of it.",
+		};
+
+		float y = 200.0f;
+		for (auto& line : lines) {
+			DrawText(line, 80, (int)y, 19, TEXT_PRIMARY);
+			y += 31.0f;
+		}
+	}
+
+	// ---- simulation screen ----
+	void drawSimulation() {
+		drawTopBar("Esc  menu");
+
+		const char* crumb = TextFormat("Layer  %d / %d", getLayerIndex() + 1, getLayerCount());
+		int cw = MeasureText(crumb, 22);
+		DrawText(crumb, screenWidth / 2 - cw / 2, 28, 22, TEXT_PRIMARY);
+
+		drawSynapses();
+		drawNextLayerPreview();
 		drawLayer();
 		drawNodeInfo();
-		drawLayerInfo();
-
+		drawSynapsePanel();
+		drawFooterHints();
 	}
 
+	void drawFooterHints() {
+		DrawRectangle(0, screenHeight - 50, screenWidth, 50, BG_PANEL);
+		DrawRectangle(0, screenHeight - 50, screenWidth, 1, BORDER_COL);
+
+		const char* hint = "1-4 move     5 / 6 layer     A B C D T H actions     Esc menu";
+		int fs = 15;
+		int tw = MeasureText(hint, fs);
+		DrawText(hint, screenWidth / 2 - tw / 2, screenHeight - 32, fs, TEXT_MUTED);
+	}
+
+	// ---- movement ----
 	void moveUp() {
 		if (currentRow <= 0) return;
-
 		int newRow = currentRow - 1;
-
-		if (positionExists(newRow, currentCol)) {
-			currentRow = newRow;
-		}
+		if (positionExists(newRow, currentCol)) currentRow = newRow;
 	}
 	void moveDown() {
 		int newRow = currentRow + 1;
-		if (positionExists(newRow, currentCol)) {
-			currentRow = newRow;
-		}
+		if (positionExists(newRow, currentCol)) currentRow = newRow;
 	}
 	void moveLeft() {
-		if (currentCol <= 0) {
-			return;
-		}
-
+		if (currentCol <= 0) return;
 		int newCol = currentCol - 1;
-
-		if (positionExists(currentRow, newCol)) {
-			currentCol = newCol;
-		}
-}
+		if (positionExists(currentRow, newCol)) currentCol = newCol;
+	}
 	void moveRight() {
 		int newCol = currentCol + 1;
-
-		if (positionExists(currentRow, newCol)) {
-			currentCol = newCol;
-		}
+		if (positionExists(currentRow, newCol)) currentCol = newCol;
 	}
-	void previousLayer() {
-		if (currentLayer <= 0)
-			return;
-		
-		int newLayer = currentLayer - 1;
-		Layer* layer = mesh.getLayerById(newLayer);
 
-		if (layer == nullptr) return;
-		currentLayer = newLayer;
-
+	void snapToFirstAvailable() {
 		currentRow = 0;
 		currentCol = 0;
-
-		Neuron* n = getCurrentNeuron();
-
-		if (n == nullptr) {
-			currentRow = 0;
-			currentCol = 0;
-
-			for (int row = 0; row < mesh.getN(); row++) {
-				for (int col = 0; col < mesh.getN(); col++) {
-					if (positionExists(row, col)) {
-						currentRow = row;
-						currentCol = col;
-						return;
-					}
+		for (int row = 0; row < mesh.getN(); row++) {
+			for (int col = 0; col < mesh.getN(); col++) {
+				if (positionExists(row, col)) {
+					currentRow = row;
+					currentCol = col;
+					return;
 				}
 			}
 		}
 	}
+
+	// keeps the selection valid after the mesh changes underneath us
+	// (delete / prune / fuse / merge can remove the layer or neuron we were on)
+	void validateSelection() {
+		if (getCurrentLayer() == nullptr) {
+			Layer* head = mesh.getHeadLayer();
+			if (head == nullptr) return;
+			currentLayer = head->layerId;
+		}
+		if (getCurrentNeuron() == nullptr) snapToFirstAvailable();
+	}
+
+	void startTransition(int direction) {
+		prevLayerId = currentLayer;
+		transitionDir = direction;
+		layerTransition = 0.0f;
+	}
+
+	// uses the layer list's own prev/next links, so it still works when
+	// layer ids are no longer contiguous (after a delete or merge)
+	void previousLayer() {
+		Layer* current = getCurrentLayer();
+		if (current == nullptr || current->prev == nullptr) return;
+
+		startTransition(-1);
+		currentLayer = current->prev->layerId;
+		currentRow = 0;
+		currentCol = 0;
+
+		if (getCurrentNeuron() == nullptr) snapToFirstAvailable();
+	}
+
 	void nextLayer() {
 		Layer* current = getCurrentLayer();
+		if (current == nullptr || current->next == nullptr) return;
 
-		if (current == nullptr) return;
-
-		if (current->next == nullptr) return;
-
+		startTransition(+1);
 		currentLayer = current->next->layerId;
-
 		currentRow = 0;
 		currentCol = 0;
 
-		Neuron* n = getCurrentNeuron();
-
-		if (n == nullptr) {
-			currentRow = 0;
-			currentCol = 0;
-
-			for (int row = 0; row < mesh.getN(); row++) {
-				for (int col = 0; col < mesh.getN(); col++) {
-					if (positionExists(row, col)) {
-						currentRow = row;
-						currentCol = col;
-						return;
-					}
-				}
-			}
-		}
+		if (getCurrentNeuron() == nullptr) snapToFirstAvailable();
 	}
 
+	// ---- lookups ----
 	Layer* getCurrentLayer() {
 		return mesh.getLayerById(currentLayer);
 	}
 	Neuron* getCurrentNeuron() {
 		return mesh.silentNeuronReturnByPosition(currentLayer, currentRow, currentCol);
 	}
+	Layer* getNextLayerPtr() {
+		Layer* l = getCurrentLayer();
+		return l ? l->next : nullptr;
+	}
 
 	int getLayerCount() {
 		int count = 0;
-		count = 0;
-		
-		for (Layer* l = mesh.getHeadLayer(); l != nullptr; l = l->next) {
-			count++;
-		}
+		for (Layer* l = mesh.getHeadLayer(); l != nullptr; l = l->next) count++;
 		return count;
 	}
-	int getMaximumRow(Layer* layer) {
-		if (layer == nullptr) return -1;
-
-		int maxRow = -1;
-
-		int row = 0;
-
-		for (Neuron* col = layer->top_left; col != nullptr; col = col->right) {
-			row = 0;
-
-			for (Neuron* n = col; n; n = n->down) {
-				if (row > maxRow) {
-					maxRow = row;
-				}
-				row++;
-			}
+	int getLayerIndex() {
+		int index = 0;
+		for (Layer* l = mesh.getHeadLayer(); l != nullptr; l = l->next, index++) {
+			if (l->layerId == currentLayer) return index;
 		}
-
-		return maxRow;
-	}
-	int getMaximumColumn(Layer* layer) {
-		if (layer == nullptr) return -1;
-
-		int maxCol = -1;
-
-		int col = 0;
-
-		for (Neuron* c = layer->top_left; c; c = c->right) {
-			maxCol = col;
-			col++;
-		}
-		return maxCol;
-	}
-
-	void drawLayer() {
-		Layer* l = getCurrentLayer();
-
-		if (l == nullptr) return;
-
-		int c = 0;
-
-		for (Neuron* col = l->top_left; col; col = col->right, c++) {
-			int row = 0;
-
-			for (Neuron* n = col; n; n = n->down, row++) {
-				float x = gridStartX + c * spacing;
-				float y = gridStartY + row * spacing;
-
-				bool selected = (row == currentRow && c == currentCol);
-
-				if (selected) {
-					DrawCircle((int)x, (int)y, nodeRadius, LIGHTGRAY);
-				}
-				else {
-					DrawCircle((int)x, (int)y, nodeRadius, WHITE);
-				}
-
-				const char* idText = TextFormat("%d", n->id);
-				int textWidth = MeasureText(idText, 14);
-
-				DrawText(idText, (int)x - textWidth / 2, (int)y - 7, 14, selected ? WHITE : BLACK);
-				
-
-			}
-
-		
-
-			
-		}
-	}
-	void drawNodeInfo() {
-		Neuron* current = getCurrentNeuron();
-
-		DrawText("current node", 50, 150, 26, WHITE);
-
-		if (current == nullptr) {
-			DrawText("No node", 50, 200, 20, WHITE);
-
-			return;
-		}
-
-		DrawText(TextFormat("Id: %d", current->id), 50, 205, 22, WHITE);
-		DrawText(TextFormat("WEIGHT: %.2f", current->weight), 50, 245, 22, WHITE);
-		DrawText(TextFormat("Layer: %d", currentLayer), 50, 285, 22, WHITE);
-		DrawText(TextFormat("Row: %d", currentRow), 50, 325, 22, WHITE);
-		DrawText(TextFormat("Col: %d", currentCol), 50, 365, 22, WHITE);
-
-	}
-	// void drawNavigationInfo(); work on this if the deadline got extended
-	void drawLayerInfo() {
-
-		
-
-
-	}
-
-
-	void drawTitle() {
-		DrawText("NeuroMesh", 40, 35, 30, WHITE);
+		return 0;
 	}
 
 	bool positionExists(int row, int col) {
 		if (row < 0 || col < 0) return false;
-
 		if (row >= mesh.getN() || col >= mesh.getN()) return false;
 
 		Neuron* n = mesh.silentNeuronReturnByPosition(currentLayer, row, col);
-
 		return n != nullptr;
 	}
 
-};
+	// ---- geometry ----
+	float slideOffset() {
+		return transitionDir * (1.0f - easeOutCubic(layerTransition)) * 24.0f;
+	}
 
+	Vector2 mainNeuronPos(int row, int col) {
+		return Vector2{ gridStartX + col * spacing, gridStartY + row * spacing + slideOffset() };
+	}
+
+	float previewX() {
+		return gridStartX + (mesh.getN() - 1) * spacing + 130.0f;
+	}
+	float previewSpacing() { return spacing * 0.6f; }
+	float previewRadius() { return nodeRadius * 0.55f; }
+
+	Vector2 previewNeuronPos(int row, int col) {
+		return Vector2{ previewX() + col * previewSpacing(), gridStartY + row * previewSpacing() };
+	}
+
+	// ---- main grid (cross-fades the old layer out while the new one slides in) ----
+	double maxWeightIn(Layer* l) {
+		double best = 0.0;
+		for (Neuron* col = l->top_left; col; col = col->right)
+			for (Neuron* n = col; n; n = n->down)
+				if (n->weight > best) best = n->weight;
+		return best;
+	}
+
+	void drawLayerGrid(Layer* l, float alpha, float yOffset, bool interactive) {
+		if (l == nullptr || alpha <= 0.0f) return;
+
+		double maxW = maxWeightIn(l);
+
+		int c = 0;
+		for (Neuron* col = l->top_left; col; col = col->right, c++) {
+			int row = 0;
+			for (Neuron* n = col; n; n = n->down, row++) {
+				float x = gridStartX + c * spacing;
+				float y = gridStartY + row * spacing + yOffset;
+
+				bool selected = interactive && (row == currentRow && c == currentCol);
+
+				float heat = (maxW > 0.0) ? (float)(n->weight / maxW) : 0.0f;
+				Color fill = selected ? ACCENT_GOLD : lerpColor(BLUE_DEEP, BLUE_LIGHT, heat);
+
+				if (selected) {
+					DrawCircle((int)x, (int)y, nodeRadius + 15, Fade(ACCENT_GOLD, 0.07f * alpha));
+					DrawCircle((int)x, (int)y, nodeRadius + 9, Fade(ACCENT_GOLD, 0.12f * alpha));
+					DrawCircleLines((int)x, (int)y, nodeRadius + 6, Fade(ACCENT_GOLD, 0.7f * alpha));
+				}
+
+				DrawCircle((int)x, (int)y, nodeRadius, Fade(fill, alpha));
+
+				const char* idText = TextFormat("%d", n->id);
+				int fs = nodeRadius >= 14.0f ? 14 : 12;
+				int textWidth = MeasureText(idText, fs);
+				DrawText(idText, (int)x - textWidth / 2, (int)y - fs / 2, fs, Fade(Color{ 8, 12, 24, 255 }, alpha));
+			}
+		}
+	}
+
+	void drawLayer() {
+		float eased = easeOutCubic(layerTransition);
+
+		if (layerTransition < 1.0f && prevLayerId != currentLayer) {
+			Layer* old = mesh.getLayerById(prevLayerId);
+			drawLayerGrid(old, 1.0f - eased, -transitionDir * eased * 24.0f, false);
+		}
+
+		drawLayerGrid(getCurrentLayer(), eased, slideOffset(), true);
+	}
+
+	// ---- next-layer preview ----
+	bool isTargetOfSelected(Neuron* candidate) {
+		Neuron* sel = getCurrentNeuron();
+		if (sel == nullptr) return false;
+		for (Synapse* s = sel->head_axon; s != nullptr; s = s->next_synapse)
+			if (s->target_neuron == candidate) return true;
+		return false;
+	}
+
+	void drawNextLayerPreview() {
+		Layer* nl = getNextLayerPtr();
+		if (nl == nullptr) return;
+
+		float eased = easeOutCubic(layerTransition);
+
+		int c = 0;
+		for (Neuron* col = nl->top_left; col; col = col->right, c++) {
+			int row = 0;
+			for (Neuron* n = col; n; n = n->down, row++) {
+				Vector2 p = previewNeuronPos(row, c);
+				bool hit = isTargetOfSelected(n);
+
+				DrawCircleV(p, previewRadius() + (hit ? 2.0f : 0.0f),
+					Fade(hit ? BLUE_PRIMARY : BG_PANEL_LIGHT, eased));
+				DrawCircleLines((int)p.x, (int)p.y, previewRadius() + (hit ? 2.0f : 0.0f),
+					Fade(hit ? BLUE_LIGHT : BORDER_COL, eased));
+
+				if (hit) {
+					const char* idText = TextFormat("%d", n->id);
+					int tw = MeasureText(idText, 12);
+					DrawText(idText, (int)p.x - tw / 2, (int)(p.y + previewRadius() + 6), 12, Fade(BLUE_LIGHT, eased));
+				}
+			}
+		}
+
+		DrawText("NEXT LAYER", (int)previewX() - 10, (int)gridStartY - 44, 13, Fade(TEXT_MUTED, eased));
+	}
+
+	// ---- synapses ----
+	bool findPositionInLayer(Layer* l, Neuron* target, int& outRow, int& outCol) {
+		if (l == nullptr || target == nullptr) return false;
+		int c = 0;
+		for (Neuron* col = l->top_left; col; col = col->right, c++) {
+			int row = 0;
+			for (Neuron* n = col; n; n = n->down, row++) {
+				if (n == target) { outRow = row; outCol = c; return true; }
+			}
+		}
+		return false;
+	}
+
+	// pass 0 draws every neuron's synapses faintly, pass 1 redraws the
+	// selected neuron's on top - bright, thicker, labelled, with a pulse
+	void drawSynapses() {
+		Layer* l = getCurrentLayer();
+		Layer* nl = getNextLayerPtr();
+		if (l == nullptr || nl == nullptr) return;
+
+		float eased = easeOutCubic(layerTransition);
+		float t = (float)GetTime();
+		Neuron* selectedNeuron = getCurrentNeuron();
+
+		for (int pass = 0; pass < 2; pass++) {
+			int c = 0;
+			for (Neuron* col = l->top_left; col; col = col->right, c++) {
+				int row = 0;
+				for (Neuron* n = col; n; n = n->down, row++) {
+					bool isSelected = (n == selectedNeuron);
+					if ((pass == 0 && isSelected) || (pass == 1 && !isSelected)) continue;
+
+					int index = 0;
+					for (Synapse* s = n->head_axon; s != nullptr; s = s->next_synapse, index++) {
+						int tr, tc;
+						if (!findPositionInLayer(nl, s->target_neuron, tr, tc)) continue;
+
+						Vector2 from = mainNeuronPos(row, c);
+						Vector2 to = previewNeuronPos(tr, tc);
+
+						if (!isSelected) {
+							drawCurve(from, to, 1.0f, Fade(BLUE_DIM, eased));
+							continue;
+						}
+
+						drawCurve(from, to, 2.4f, Fade(BLUE_BRIGHT, eased));
+
+						float phase = t * 0.7f + index * 0.22f;
+						float pulseT = phase - floorf(phase);
+						Vector2 p = curvePoint(from, to, pulseT);
+						DrawCircleV(p, 5.0f, Fade(BLUE_LIGHT, 0.25f * eased));
+						DrawCircleV(p, 2.8f, Fade(Color{ 255, 255, 255, 255 }, eased));
+
+						Vector2 mid = curvePoint(from, to, 0.5f);
+						DrawText(TextFormat("%c %.1f", s->direction, s->weight),
+							(int)mid.x - 16, (int)mid.y - 18, 13, Fade(BLUE_LIGHT, eased));
+					}
+				}
+			}
+		}
+	}
+
+	// ---- side panels ----
+	void drawNodeInfo() {
+		Rectangle panel = { 40.0f, 110.0f, 400.0f, 250.0f };
+		DrawRectangleRounded(panel, 0.05f, 8, BG_PANEL);
+		DrawRectangleLinesEx(panel, 1.0f, BORDER_COL);
+
+		DrawText("CURRENT NEURON", 65, 132, 15, TEXT_MUTED);
+
+		Neuron* current = getCurrentNeuron();
+		if (current == nullptr) {
+			DrawText("No neuron here", 65, 180, 22, TEXT_MUTED);
+			return;
+		}
+
+		DrawText("Id", 65, 172, 20, TEXT_MUTED);
+		DrawText(TextFormat("%d", current->id), 190, 170, 24, TEXT_PRIMARY);
+		DrawText("Weight", 65, 208, 20, TEXT_MUTED);
+		DrawText(TextFormat("%.2f", current->weight), 190, 206, 24, TEXT_PRIMARY);
+		DrawText("Layer", 65, 244, 20, TEXT_MUTED);
+		DrawText(TextFormat("%d", currentLayer), 190, 242, 24, TEXT_PRIMARY);
+		DrawText("Row / Col", 65, 280, 20, TEXT_MUTED);
+		DrawText(TextFormat("%d / %d", currentRow, currentCol), 190, 278, 24, TEXT_PRIMARY);
+		DrawText("Synapses", 65, 316, 20, TEXT_MUTED);
+
+		int count = 0;
+		for (Synapse* s = current->head_axon; s != nullptr; s = s->next_synapse) count++;
+		DrawText(TextFormat("%d", count), 190, 314, 24, TEXT_PRIMARY);
+	}
+
+	void drawSynapsePanel() {
+		Rectangle panel = { 40.0f, 380.0f, 400.0f, 210.0f };
+		DrawRectangleRounded(panel, 0.05f, 8, BG_PANEL);
+		DrawRectangleLinesEx(panel, 1.0f, BORDER_COL);
+
+		DrawText("OUTGOING SYNAPSES", 65, 402, 15, TEXT_MUTED);
+
+		Neuron* current = getCurrentNeuron();
+		if (current == nullptr || current->head_axon == nullptr) {
+			DrawText(getNextLayerPtr() == nullptr ? "Last layer - no outgoing synapses" : "None", 65, 440, 18, TEXT_MUTED);
+			return;
+		}
+
+		float y = 436.0f;
+		int shown = 0;
+		for (Synapse* s = current->head_axon; s != nullptr && shown < 4; s = s->next_synapse, shown++) {
+			DrawText(TextFormat("%c", s->direction), 65, (int)y, 20, ACCENT_GOLD);
+			DrawText(TextFormat("to neuron %d", s->target_neuron->id), 100, (int)y, 20, TEXT_PRIMARY);
+			DrawText(TextFormat("w %.2f", s->weight), 320, (int)y, 20, BLUE_LIGHT);
+			y += 36.0f;
+		}
+	}
+
+};
